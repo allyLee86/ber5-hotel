@@ -1,0 +1,396 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;600;700&display=swap');
+
+:root {
+  --primary:    #0077b6;
+  --primary-dk: #005f8e;
+  --primary-lt: #e0f4f9;
+  --border:     #c8cde8;
+  --text:       #1a1f3c;
+  --muted:      #6b75a8;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+.rc-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #f0f2fa;
+  font-family: 'Noto Sans Lao', 'Segoe UI', sans-serif;
+  color: var(--text);
+}
+
+/* ── Top bar (screen only) ── */
+.rc-topbar {
+  display: flex;
+  align-items: center;
+  background: var(--primary);
+  color: #fff;
+  height: 52px;
+  padding: 0 20px;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.rc-back-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+
+.rc-back-btn:hover { background: rgba(255,255,255,0.15); }
+
+.rc-bar-title {
+  flex: 1;
+  text-align: center;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.rc-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.rc-lang-pill {
+  background: rgba(255,255,255,0.18);
+  border: 1.5px solid rgba(255,255,255,0.5);
+  color: #fff;
+  border-radius: 20px;
+  padding: 4px 13px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.rc-lang-pill:hover { background: rgba(255,255,255,0.3); }
+
+.rc-print-btn {
+  background: rgba(255,255,255,0.15);
+  border: 1.5px solid rgba(255,255,255,0.45);
+  color: #fff;
+  border-radius: 7px;
+  padding: 5px 14px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.rc-print-btn:hover { background: rgba(255,255,255,0.28); }
+
+/* ── Page wrapper ── */
+.rc-page {
+  display: flex;
+  justify-content: center;
+  padding: 28px 20px 40px;
+}
+
+/* ── Receipt card ── */
+.rc-card {
+  background: #fff;
+  border: 2px solid var(--primary);
+  border-radius: 14px;
+  width: 100%;
+  max-width: 820px;
+  padding: 28px 32px 32px;
+  box-shadow: 0 4px 24px rgba(59,79,191,0.1);
+}
+
+/* ── Card header row ── */
+.rc-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+}
+
+.rc-hotel-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.rc-invoice-no {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+/* ── Receipt centered title ── */
+.rc-receipt-title {
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text);
+  margin: 10px 0 20px;
+  letter-spacing: 0.5px;
+}
+
+/* ── Two-column content ── */
+.rc-content {
+  display: flex;
+  gap: 0;
+  align-items: flex-start;
+}
+
+/* ─── Left: sections ─── */
+.rc-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-right: 28px;
+  border-right: 1.5px solid var(--border);
+}
+
+.rc-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rc-section-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.rc-section-rule {
+  height: 1.5px;
+  background: var(--primary);
+  opacity: 0.35;
+  margin-top: -4px;
+}
+
+.rc-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-left: 12px;
+}
+
+/* ── Data row ── */
+.rc-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.rc-row-label {
+  font-size: 0.8rem;
+  color: var(--muted);
+  min-width: 110px;
+  flex-shrink: 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.rc-row-value {
+  font-size: 0.88rem;
+  color: var(--text);
+  border-bottom: 1px solid #d8dbed;
+  flex: 1;
+  padding-bottom: 1px;
+}
+
+.rc-row-value--strong {
+  font-weight: 700;
+}
+
+/* ── Total box ── */
+.rc-total-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 2px solid var(--primary);
+  border-radius: 7px;
+  padding: 8px 16px;
+  align-self: flex-end;
+  margin-top: 4px;
+}
+
+.rc-star {
+  color: var(--primary);
+  font-size: 1rem;
+}
+
+.rc-total-label {
+  font-size: 0.85rem;
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.rc-total-value {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--text);
+}
+
+/* ─── Right: room badge + actions ─── */
+.rc-right {
+  width: 180px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding-left: 28px;
+}
+
+.rc-room-badge {
+  width: 96px;
+  height: 96px;
+  border-radius: 18px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 2.8rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: -1px;
+  margin-bottom: 2px;
+}
+
+.rc-room-type {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--primary);
+  text-align: center;
+}
+
+.rc-price-night {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text);
+  text-align: center;
+}
+
+/* Action buttons in sidebar */
+.rc-right-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  margin-top: 16px;
+}
+
+.rc-action-print {
+  width: 100%;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 11px 0;
+  font-size: 0.88rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s, box-shadow 0.15s;
+  box-shadow: 0 3px 10px rgba(59,79,191,0.28);
+}
+
+.rc-action-print:hover { background: var(--primary-dk); }
+
+.rc-action-back {
+  width: 100%;
+  background: #fff;
+  color: var(--primary);
+  border: 1.8px solid var(--primary);
+  border-radius: 8px;
+  padding: 10px 0;
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.rc-action-back:hover { background: var(--primary-lt); }
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .rc-page { padding: 16px 0; }
+
+  .rc-card {
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    padding: 20px 16px;
+  }
+
+  .rc-content { flex-direction: column; gap: 24px; }
+
+  .rc-left {
+    padding-right: 0;
+    border-right: none;
+  }
+
+  .rc-right {
+    width: 100%;
+    padding-left: 0;
+    padding-top: 20px;
+    border-top: 1.5px solid var(--border);
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .rc-right-actions { flex-direction: row; width: auto; }
+
+  .rc-action-print,
+  .rc-action-back   { min-width: 110px; }
+}
+
+/* ── Print styles ── */
+@media print {
+  /* Hide everything except the card */
+  .no-print { display: none !important; }
+
+  .rc-root   { background: #fff; }
+  .rc-page   { padding: 0; }
+
+  .rc-card {
+    border: 1.5px solid #555;
+    border-radius: 0;
+    box-shadow: none;
+    max-width: 100%;
+    padding: 20px 24px;
+  }
+
+  .rc-hotel-name,
+  .rc-invoice-no,
+  .rc-section-title,
+  .rc-total-label,
+  .rc-star,
+  .rc-room-type  { color: #000 !important; }
+
+  .rc-room-badge {
+    background: #333 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .rc-total-box { border-color: #333 !important; }
+  .rc-section-rule { background: #333 !important; opacity: 0.4; }
+
+  .rc-right-actions { display: none !important; }
+}

@@ -1,0 +1,253 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;600;700&display=swap');
+
+.login-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #023e8a 0%, #0077b6 60%, #00b4d8 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  font-family: 'Noto Sans Lao', 'Segoe UI', sans-serif;
+  position: relative;
+}
+
+/* Language pill — top right corner */
+.login-lang-pill {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(255,255,255,0.18);
+  border: 1.5px solid rgba(255,255,255,0.5);
+  color: #fff;
+  border-radius: 20px;
+  padding: 5px 16px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: background 0.15s;
+}
+
+.login-lang-pill:hover { background: rgba(255,255,255,0.3); }
+
+/* ── Card ── */
+.login-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 40px 36px 36px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 20px 60px rgba(20, 30, 90, 0.35);
+}
+
+/* ── Brand / logo section ── */
+.login-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.login-logo {
+  width: 72px;
+  height: 72px;
+  margin-bottom: 14px;
+}
+
+.login-logo svg {
+  width: 100%;
+  height: 100%;
+}
+
+.login-name-lo {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #0077b6;
+  margin: 0 0 3px;
+  letter-spacing: 0.3px;
+  text-align: center;
+}
+
+.login-name-en {
+  font-size: 0.88rem;
+  color: #7a85b0;
+  margin: 0;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  text-align: center;
+}
+
+/* ── Form ── */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* ── Field ── */
+.login-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.login-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #0077b6;
+  letter-spacing: 0.2px;
+}
+
+.login-input-wrap {
+  display: flex;
+  align-items: center;
+  border: 1.8px solid #c8cde8;
+  border-radius: 10px;
+  background: #f7f8fd;
+  transition: border-color 0.18s, box-shadow 0.18s;
+  overflow: hidden;
+}
+
+.login-input-wrap:focus-within {
+  border-color: #0077b6;
+  box-shadow: 0 0 0 3px rgba(0, 119, 182, 0.15);
+  background: #fff;
+}
+
+.login-field--error .login-input-wrap {
+  border-color: #d32f2f;
+  box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.1);
+}
+
+.login-input-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  color: #7a85b0;
+  flex-shrink: 0;
+}
+
+.login-input-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.login-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 0.93rem;
+  font-family: inherit;
+  color: #1a1f3c;
+  padding: 0 4px 0 0;
+  height: 44px;
+}
+
+.login-input::placeholder {
+  color: #b0b8d0;
+}
+
+.login-eye-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  color: #7a85b0;
+  height: 44px;
+  transition: color 0.15s;
+}
+
+.login-eye-btn:hover { color: #0077b6; }
+
+.login-eye-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ── Inline field error ── */
+.login-error-text {
+  font-size: 0.74rem;
+  color: #d32f2f;
+  margin: 0;
+  padding-left: 2px;
+}
+
+/* ── Auth error banner ── */
+.login-auth-error {
+  background: #fdecea;
+  border: 1px solid #f5c6c6;
+  border-radius: 8px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.login-auth-error span {
+  font-size: 0.8rem;
+  color: #b71c1c;
+  line-height: 1.5;
+}
+
+/* ── Forgot password ── */
+.login-forgot-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -6px;
+}
+
+.login-forgot-btn {
+  background: none;
+  border: none;
+  color: #0077b6;
+  font-size: 0.78rem;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  opacity: 0.85;
+  transition: opacity 0.15s;
+}
+
+.login-forgot-btn:hover { opacity: 1; }
+
+/* ── Submit button ── */
+.login-submit-btn {
+  background: #0077b6;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 13px;
+  font-size: 0.97rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  letter-spacing: 0.3px;
+  transition: background 0.18s, transform 0.1s, box-shadow 0.18s;
+  box-shadow: 0 4px 14px rgba(0, 119, 182, 0.35);
+  margin-top: 4px;
+}
+
+.login-submit-btn:hover {
+  background: #005f8e;
+  box-shadow: 0 6px 18px rgba(0, 119, 182, 0.45);
+}
+
+.login-submit-btn:active {
+  transform: scale(0.98);
+}
+
+/* ── Responsive ── */
+@media (max-width: 440px) {
+  .login-card {
+    padding: 32px 24px 28px;
+    border-radius: 16px;
+  }
+}

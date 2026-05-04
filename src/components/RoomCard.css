@@ -1,0 +1,120 @@
+:root {
+  --primary:    #0077b6;
+  --primary-dk: #005f8e;
+  --orange:     #E8840A;
+}
+
+.room-card {
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  border: none;
+  padding: 0;
+  font-family: 'Noto Sans Lao', 'Segoe UI', sans-serif;
+  transition: transform 0.12s, box-shadow 0.12s;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+  min-height: 115px;
+}
+
+.room-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+}
+
+/* Status variants */
+.room-card--vacant {
+  background: #fff;
+  border: 2px solid var(--primary);
+}
+
+.room-card--occupied {
+  background: var(--primary);
+  border: 2px solid var(--primary);
+}
+
+.room-card--booked {
+  background: var(--orange);
+  border: 2px solid var(--orange);
+}
+
+/* Body */
+.room-card__body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 10px 8px;
+}
+
+/* Vacant label */
+.room-card__vacant-text {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+/* Icon + guest info — horizontal, whole group centered */
+.room-card__filled-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Icons — 44×44, sized in the SVG itself */
+.rc-icon {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+}
+
+/* Stacked name + check-in */
+.room-card__guest-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  min-width: 0;
+}
+
+.room-card__guest-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 80px;
+}
+
+.room-card__checkin {
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.85);
+  white-space: nowrap;
+}
+
+/* Footer: room number */
+.room-card__footer {
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 7px 8px;
+}
+
+.room-card--vacant .room-card__footer {
+  color: var(--primary);
+  border-top: 1.5px solid var(--primary);
+  background: #fff;
+}
+
+.room-card--occupied .room-card__footer {
+  color: #fff;
+  background: var(--primary-dk);
+}
+
+.room-card--booked .room-card__footer {
+  color: #fff;
+  background: rgba(0, 0, 0, 0.15);
+}
