@@ -1,6 +1,13 @@
 {
   "name": "ber5-hotel-management",
   "version": "0.1.0",
+  "description": "Hotel management system for Ber 5 Guest House",
+  "author": "Ber 5 Guest House",
+  "license": "MIT",
+  "homepage": ".",
+  "engines": {
+    "node": ">=14.0.0"
+  },
   "private": true,
   "dependencies": {
     "@testing-library/dom": "^10.4.1",
