@@ -25,35 +25,34 @@ export default function RoomPanel({ room, onSave, onCancel }) {
 
   /* ── Panel A: vacancy form state ── */
   const [form, setForm] = useState({
-    nickName:   '',
-    firstName:  '',
-    middleName: '',
-    lastName:   '',
-    age:        '',
-    gender:     '',
-    phone:      '',
-    idCard:     '',
-    passportId: '',
-    checkIn:    '',
-    checkOut:   '',
+    nickName: '', firstName: '', middleName: '', lastName: '',
+    age: '', gender: '', phone: '', idCard: '', passportId: '',
+    checkIn: '', checkOut: '',
   });
   const [errors, setErrors]       = useState({});
   const [submitted, setSubmitted] = useState(false);
 
-  /* ── Panel C: checkout date state ── */
+  /* ── Edit mode (Panels B & C) ── */
+  const [editMode, setEditMode] = useState(false);
+  const [editForm, setEditForm] = useState(null);
+
+  /* ── Confirmation modal ── */
+  const [confirmAction, setConfirmAction] = useState(null); // { message, onConfirm }
+
+  /* ── Panel C: checkout date ── */
   const [checkOutDate, setCheckOutDate] = useState(TODAY);
 
-  /* ── Computed: Panel A ── */
+  /* ── Computed ── */
   const bookedNights = calcNights(form.checkIn, form.checkOut);
   const bookedTotal  = bookedNights * price;
 
-  /* ── Computed: Panel C ── */
-  const gd            = room.guestData;
-  const checkInDate   = gd?.checkIn ?? '';
-  const coNights      = calcNights(checkInDate, checkOutDate);
-  const coTotal       = coNights * price;
-  const genderLabel   = gd?.gender ? (t[gd.gender]?.[lang] ?? gd.gender) : '—';
+  const gd          = room.guestData;
+  const checkInDate = gd?.checkIn ?? '';
+  const coNights    = calcNights(checkInDate, checkOutDate);
+  const coTotal     = coNights * price;
+  const genderLabel = gd?.gender ? (t[gd.gender]?.[lang] ?? gd.gender) : '—';
 
+  /* ── Panel A handlers ── */
   function handleChange(field, value) {
     setForm(prev => ({ ...prev, [field]: value }));
     if (submitted) setErrors(validate({ ...form, [field]: value }));
@@ -65,19 +64,32 @@ export default function RoomPanel({ room, onSave, onCancel }) {
     return e;
   }
 
-  function submitForm(newStatus) {
+  function trySubmit(newStatus) {
     setSubmitted(true);
     const errs = validate(form);
     setErrors(errs);
-    if (Object.keys(errs).length) {
-      alert(t.required[lang]);
-      return;
-    }
-    onSave({ ...room, status: newStatus, guestData: { ...form } });
+    if (Object.keys(errs).length) { alert(t.required[lang]); return; }
+    const label = newStatus === 'booked' ? t.saveBooked[lang] : t.checkInNow[lang];
+    setConfirmAction({
+      message: `${label} — ${t.roomNo[lang]} ${room.num}?`,
+      onConfirm: () => onSave({ ...room, status: newStatus, guestData: { ...form } }),
+    });
   }
 
+  /* ── Checkout (Panel C) ── */
   function handleCheckOut() {
-    onSave({ ...room, status: 'vacant', guestData: null });
+    setConfirmAction({
+      message: `${t.checkOutNow[lang]} — ${t.roomNo[lang]} ${room.num}?`,
+      onConfirm: () => onSave({ ...room, status: 'vacant', guestData: null }),
+    });
+  }
+
+  /* ── Booked → Occupied (Panel B) ── */
+  function handleBookedCheckIn() {
+    setConfirmAction({
+      message: `${t.checkInNow[lang]} — ${t.roomNo[lang]} ${room.num}?`,
+      onConfirm: () => onSave({ ...room, status: 'occupied' }),
+    });
   }
 
   function handleCancelBooking() {
@@ -85,7 +97,39 @@ export default function RoomPanel({ room, onSave, onCancel }) {
     onSave({ ...room, status: 'vacant', guestData: null });
   }
 
-  /* ── Title per panel ── */
+  /* ── Edit mode (Panels B & C) ── */
+  function startEdit() {
+    setEditForm({
+      nickName:   gd?.nickName   ?? '',
+      firstName:  gd?.firstName  ?? '',
+      middleName: gd?.middleName ?? '',
+      lastName:   gd?.lastName   ?? '',
+      age:        gd?.age        ?? '',
+      gender:     gd?.gender     ?? '',
+      phone:      gd?.phone      ?? '',
+      idCard:     gd?.idCard     ?? '',
+      passportId: gd?.passportId ?? '',
+      checkIn:    gd?.checkIn    ?? '',
+      checkOut:   gd?.checkOut   ?? '',
+    });
+    setEditMode(true);
+  }
+
+  function cancelEdit() {
+    setEditMode(false);
+    setEditForm(null);
+  }
+
+  function saveEdit() {
+    onSave({ ...room, guestData: { ...editForm } });
+    setEditMode(false);
+    setEditForm(null);
+  }
+
+  function handleEditChange(field, value) {
+    setEditForm(prev => ({ ...prev, [field]: value }));
+  }
+
   const titles = {
     vacant:   t.guestInfo[lang],
     booked:   `${t.booked[lang]} — ${t.roomNo[lang]} ${room.num}`,
@@ -109,7 +153,7 @@ export default function RoomPanel({ room, onSave, onCancel }) {
       {/* ── Body ── */}
       <div className="rp-body">
 
-        {/* ─── Main content area ─── */}
+        {/* ─── Main content ─── */}
         <div className="rp-main">
 
           {/* ════════ PANEL A — Vacant ════════ */}
@@ -121,12 +165,8 @@ export default function RoomPanel({ room, onSave, onCancel }) {
 
                 <div className="rp-field">
                   <label className="rp-label">{t.nickName[lang]}</label>
-                  <input
-                    className="rp-input"
-                    type="text"
-                    value={form.nickName}
-                    onChange={e => handleChange('nickName', e.target.value)}
-                  />
+                  <input className="rp-input" type="text" value={form.nickName}
+                    onChange={e => handleChange('nickName', e.target.value)} />
                 </div>
 
                 <div className="rp-row">
@@ -229,41 +269,60 @@ export default function RoomPanel({ room, onSave, onCancel }) {
 
           {/* ════════ PANEL B — Booked ════════ */}
           {room.status === 'booked' && (
-            <>
-              <ReadSection title={t.guestInfo[lang]}>
-                <ReadRow label={t.nickName[lang]}   value={gd?.nickName} />
-                <ReadRow label={t.firstName[lang]}  value={gd?.firstName} />
-                <ReadRow label={t.middleName[lang]} value={gd?.middleName} />
-                <ReadRow label={t.lastName[lang]}   value={gd?.lastName} />
-                <ReadRow label={t.age[lang]}        value={gd?.age} />
-                <ReadRow label={t.gender[lang]}     value={genderLabel} />
-                <ReadRow label={t.phone[lang]}      value={gd?.phone} />
-                <ReadRow label={t.idCard[lang]}     value={gd?.idCard} />
-                <ReadRow label={t.passportId[lang]} value={gd?.passportId} />
-              </ReadSection>
-              <ReadSection title={t.stayPeriod[lang]}>
-                <ReadRow label={t.checkIn[lang]}  value={fmtDate(gd?.checkIn)} />
-                <ReadRow label={t.checkOut[lang]} value={fmtDate(gd?.checkOut)} />
-              </ReadSection>
-            </>
+            editMode && editForm ? (
+              <EditGuestForm
+                editForm={editForm}
+                onFieldChange={handleEditChange}
+                lang={lang}
+                showDates={true}
+              />
+            ) : (
+              <>
+                <ReadSection title={t.guestInfo[lang]}>
+                  <ReadRow label={t.nickName[lang]}   value={gd?.nickName} />
+                  <ReadRow label={t.firstName[lang]}  value={gd?.firstName} />
+                  <ReadRow label={t.middleName[lang]} value={gd?.middleName} />
+                  <ReadRow label={t.lastName[lang]}   value={gd?.lastName} />
+                  <ReadRow label={t.age[lang]}        value={gd?.age} />
+                  <ReadRow label={t.gender[lang]}     value={genderLabel} />
+                  <ReadRow label={t.phone[lang]}      value={gd?.phone} />
+                  <ReadRow label={t.idCard[lang]}     value={gd?.idCard} />
+                  <ReadRow label={t.passportId[lang]} value={gd?.passportId} />
+                </ReadSection>
+                <ReadSection title={t.stayPeriod[lang]}>
+                  <ReadRow label={t.checkIn[lang]}  value={fmtDate(gd?.checkIn)} />
+                  <ReadRow label={t.checkOut[lang]} value={fmtDate(gd?.checkOut)} />
+                </ReadSection>
+              </>
+            )
           )}
 
           {/* ════════ PANEL C — Occupied ════════ */}
           {room.status === 'occupied' && (
             <>
-              <ReadSection title={t.guestInfo[lang]}>
-                <ReadRow label={t.nickName[lang]}   value={gd?.nickName} />
-                <ReadRow label={t.firstName[lang]}  value={gd?.firstName} />
-                <ReadRow label={t.middleName[lang]} value={gd?.middleName} />
-                <ReadRow label={t.lastName[lang]}   value={gd?.lastName} />
-                <ReadRow label={t.age[lang]}        value={gd?.age} />
-                <ReadRow label={t.gender[lang]}     value={genderLabel} />
-                <ReadRow label={t.phone[lang]}      value={gd?.phone} />
-                <ReadRow label={t.idCard[lang]}     value={gd?.idCard} />
-                <ReadRow label={t.passportId[lang]} value={gd?.passportId} />
-                <ReadRow label={t.checkIn[lang]}    value={fmtDate(checkInDate)} />
-              </ReadSection>
+              {editMode && editForm ? (
+                <EditGuestForm
+                  editForm={editForm}
+                  onFieldChange={handleEditChange}
+                  lang={lang}
+                  showDates={false}
+                />
+              ) : (
+                <ReadSection title={t.guestInfo[lang]}>
+                  <ReadRow label={t.nickName[lang]}   value={gd?.nickName} />
+                  <ReadRow label={t.firstName[lang]}  value={gd?.firstName} />
+                  <ReadRow label={t.middleName[lang]} value={gd?.middleName} />
+                  <ReadRow label={t.lastName[lang]}   value={gd?.lastName} />
+                  <ReadRow label={t.age[lang]}        value={gd?.age} />
+                  <ReadRow label={t.gender[lang]}     value={genderLabel} />
+                  <ReadRow label={t.phone[lang]}      value={gd?.phone} />
+                  <ReadRow label={t.idCard[lang]}     value={gd?.idCard} />
+                  <ReadRow label={t.passportId[lang]} value={gd?.passportId} />
+                  <ReadRow label={t.checkIn[lang]}    value={fmtDate(checkInDate)} />
+                </ReadSection>
+              )}
 
+              {/* Checkout date — always visible in Panel C */}
               <div className="rp-section">
                 <h2 className="rp-section-title">{t.checkOutDate[lang]}</h2>
                 <div className="rp-divider" />
@@ -311,42 +370,196 @@ export default function RoomPanel({ room, onSave, onCancel }) {
 
           <div className="rp-sidebar-divider" />
 
-          {/* Panel A buttons */}
+          {/* Panel A */}
           {room.status === 'vacant' && (
             <>
-              <button className="rp-btn rp-btn--orange" onClick={() => submitForm('booked')}>
+              <button className="rp-btn rp-btn--orange" onClick={() => trySubmit('booked')}>
                 {t.saveBooked[lang]}
               </button>
-              <button className="rp-btn rp-btn--primary" onClick={() => submitForm('occupied')}>
+              <button className="rp-btn rp-btn--primary" onClick={() => trySubmit('occupied')}>
                 {t.checkInNow[lang]}
               </button>
             </>
           )}
 
-          {/* Panel B buttons */}
+          {/* Panel B */}
           {room.status === 'booked' && (
-            <>
-              <button className="rp-btn rp-btn--primary" onClick={() => onSave({ ...room, status: 'occupied' })}>
-                {t.checkInNow[lang]}
-              </button>
-              <button className="rp-btn rp-btn--red-outline" onClick={handleCancelBooking}>
-                {t.cancelBooking[lang]}
-              </button>
-            </>
+            editMode ? (
+              <>
+                <button className="rp-btn rp-btn--primary" onClick={saveEdit}>
+                  {t.saveChanges[lang]}
+                </button>
+                <button className="rp-btn rp-btn--outline" onClick={cancelEdit}>
+                  {t.cancel[lang]}
+                </button>
+              </>
+            ) : (
+              <>
+                <button className="rp-btn rp-btn--outline" onClick={startEdit}>
+                  {t.editGuestInfo[lang]}
+                </button>
+                <button className="rp-btn rp-btn--primary" onClick={handleBookedCheckIn}>
+                  {t.checkInNow[lang]}
+                </button>
+                <button className="rp-btn rp-btn--red-outline" onClick={handleCancelBooking}>
+                  {t.cancelBooking[lang]}
+                </button>
+              </>
+            )
           )}
 
-          {/* Panel C buttons */}
+          {/* Panel C */}
           {room.status === 'occupied' && (
-            <>
-              <button className="rp-btn rp-btn--primary" onClick={handleCheckOut}>
-                {t.checkOutNow[lang]}
-              </button>
-              <button className="rp-btn rp-btn--outline" onClick={onCancel}>
-                {t.close[lang]}
-              </button>
-            </>
+            editMode ? (
+              <>
+                <button className="rp-btn rp-btn--primary" onClick={saveEdit}>
+                  {t.saveChanges[lang]}
+                </button>
+                <button className="rp-btn rp-btn--outline" onClick={cancelEdit}>
+                  {t.cancel[lang]}
+                </button>
+              </>
+            ) : (
+              <>
+                <button className="rp-btn rp-btn--outline" onClick={startEdit}>
+                  {t.editGuestInfo[lang]}
+                </button>
+                <button className="rp-btn rp-btn--primary" onClick={handleCheckOut}>
+                  {t.checkOutNow[lang]}
+                </button>
+                <button className="rp-btn rp-btn--outline" onClick={onCancel}>
+                  {t.close[lang]}
+                </button>
+              </>
+            )
           )}
         </aside>
+      </div>
+
+      {/* ── Confirmation modal ── */}
+      {confirmAction && (
+        <ConfirmModal
+          message={confirmAction.message}
+          onConfirm={() => { confirmAction.onConfirm(); setConfirmAction(null); }}
+          onCancel={() => setConfirmAction(null)}
+          lang={lang}
+        />
+      )}
+    </div>
+  );
+}
+
+/* ── Edit guest form (Panels B & C) ── */
+
+function EditGuestForm({ editForm, onFieldChange, lang, showDates }) {
+  return (
+    <>
+      <div className="rp-section">
+        <h2 className="rp-section-title">{t.guestInfo[lang]}</h2>
+        <div className="rp-divider" />
+
+        <div className="rp-field">
+          <label className="rp-label">{t.nickName[lang]}</label>
+          <input className="rp-input" type="text" value={editForm.nickName}
+            onChange={e => onFieldChange('nickName', e.target.value)} />
+        </div>
+
+        <div className="rp-row">
+          <div className="rp-field rp-field--flex">
+            <label className="rp-label">{t.firstName[lang]}</label>
+            <input className="rp-input" type="text" value={editForm.firstName}
+              onChange={e => onFieldChange('firstName', e.target.value)} />
+          </div>
+          <div className="rp-field rp-field--flex">
+            <label className="rp-label">{t.middleName[lang]}</label>
+            <input className="rp-input" type="text" value={editForm.middleName}
+              onChange={e => onFieldChange('middleName', e.target.value)} />
+          </div>
+        </div>
+
+        <div className="rp-field">
+          <label className="rp-label">{t.lastName[lang]}</label>
+          <input className="rp-input" type="text" value={editForm.lastName}
+            onChange={e => onFieldChange('lastName', e.target.value)} />
+        </div>
+
+        <div className="rp-row">
+          <div className="rp-field rp-field--narrow">
+            <label className="rp-label">{t.age[lang]}</label>
+            <input className="rp-input" type="number" min="1" max="120"
+              value={editForm.age} onChange={e => onFieldChange('age', e.target.value)} />
+          </div>
+          <div className="rp-field rp-field--flex">
+            <label className="rp-label">{t.gender[lang]}</label>
+            <select className="rp-input rp-select" value={editForm.gender}
+              onChange={e => onFieldChange('gender', e.target.value)}>
+              <option value="">{t.select[lang]}</option>
+              <option value="male">{t.male[lang]}</option>
+              <option value="female">{t.female[lang]}</option>
+              <option value="other">{t.other[lang]}</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="rp-field rp-field--half">
+          <label className="rp-label">{t.phone[lang]}</label>
+          <input className="rp-input" type="tel" value={editForm.phone}
+            onChange={e => onFieldChange('phone', e.target.value)} />
+        </div>
+
+        <div className="rp-row">
+          <div className="rp-field rp-field--flex">
+            <label className="rp-label">{t.idCard[lang]}</label>
+            <input className="rp-input" type="text" value={editForm.idCard}
+              onChange={e => onFieldChange('idCard', e.target.value)} />
+          </div>
+          <div className="rp-field rp-field--flex">
+            <label className="rp-label">{t.passportId[lang]}</label>
+            <input className="rp-input" type="text" value={editForm.passportId}
+              onChange={e => onFieldChange('passportId', e.target.value)} />
+          </div>
+        </div>
+      </div>
+
+      {showDates && (
+        <div className="rp-section">
+          <h2 className="rp-section-title">{t.stayPeriod[lang]}</h2>
+          <div className="rp-divider" />
+          <div className="rp-row">
+            <div className="rp-field rp-field--flex">
+              <label className="rp-label">{t.checkIn[lang]}</label>
+              <input className="rp-input" type="date" value={editForm.checkIn}
+                onChange={e => onFieldChange('checkIn', e.target.value)} />
+            </div>
+            <div className="rp-date-dash">—</div>
+            <div className="rp-field rp-field--flex">
+              <label className="rp-label">{t.checkOutOptional[lang]}</label>
+              <input className="rp-input" type="date" value={editForm.checkOut}
+                min={editForm.checkIn || undefined}
+                onChange={e => onFieldChange('checkOut', e.target.value)} />
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+/* ── Confirmation modal ── */
+
+function ConfirmModal({ message, onConfirm, onCancel, lang }) {
+  return (
+    <div className="rp-confirm-overlay" onClick={e => e.target === e.currentTarget && onCancel()}>
+      <div className="rp-confirm-box">
+        <p className="rp-confirm-msg">{message}</p>
+        <div className="rp-confirm-actions">
+          <button className="rp-btn rp-btn--outline rp-confirm-btn" onClick={onCancel}>
+            {t.cancel[lang]}
+          </button>
+          <button className="rp-btn rp-btn--primary rp-confirm-btn" onClick={onConfirm}>
+            {t.confirm[lang]}
+          </button>
+        </div>
       </div>
     </div>
   );

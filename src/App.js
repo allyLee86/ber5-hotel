@@ -63,6 +63,23 @@ function upsertGuest(prev, gd, room) {
   }];
 }
 
+function updateGuestInfo(prev, oldGd, newGd, roomNum) {
+  return prev.map(g => {
+    const byIds = matchesGuest(g, oldGd) || matchesGuest(g, newGd);
+    const byRoom = !byIds && g.stays.some(s => s.roomNum === roomNum && s.status === 'current');
+    if (!byIds && !byRoom) return g;
+    const updated = { ...g, guestType: detectGuestType(newGd) };
+    ['nickName','firstName','middleName','lastName','age','gender','phone','idCard','passportId']
+      .forEach(k => { if (newGd[k]) updated[k] = newGd[k]; });
+    updated.stays = g.stays.map(s =>
+      s.roomNum === roomNum && s.status === 'current'
+        ? { ...s, checkIn: newGd.checkIn ?? s.checkIn, checkOut: newGd.checkOut ?? s.checkOut }
+        : s
+    );
+    return updated;
+  });
+}
+
 function completeGuestStay(prev, roomNum, checkOutDate, nights, total) {
   return prev.map(g => {
     const hasCurrent = g.stays.some(s => s.roomNum === roomNum && s.status === 'current');
@@ -104,12 +121,22 @@ export default function App() {
     setRooms(prev => prev.map(r => r.num === updatedRoom.num ? updatedRoom : r));
 
     const wasVacant   = selectedRoom?.status === 'vacant';
+    const wasBooked   = selectedRoom?.status === 'booked';
     const wasOccupied = selectedRoom?.status === 'occupied';
-    const isNowVacant = updatedRoom.status === 'vacant';
-    const isNowActive = updatedRoom.status === 'occupied' || updatedRoom.status === 'booked';
+    const isNowVacant    = updatedRoom.status === 'vacant';
+    const isNowBooked    = updatedRoom.status === 'booked';
+    const isNowOccupied  = updatedRoom.status === 'occupied';
+    const isNowActive    = isNowOccupied || isNowBooked;
 
     if (wasVacant && isNowActive && updatedRoom.guestData) {
       setGuests(prev => upsertGuest(prev, updatedRoom.guestData, updatedRoom));
+    }
+
+    /* Info edit: same status, guest data changed */
+    if ((wasBooked && isNowBooked) || (wasOccupied && isNowOccupied)) {
+      if (updatedRoom.guestData) {
+        setGuests(prev => updateGuestInfo(prev, selectedRoom.guestData, updatedRoom.guestData, selectedRoom.num));
+      }
     }
 
     if (wasOccupied && isNowVacant) {

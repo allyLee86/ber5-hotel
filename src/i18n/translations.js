@@ -88,6 +88,7 @@ export const t = {
   completed:             { lo: 'ສຳເລັດ',                       en: 'Completed' },
   searchGuestPlaceholder:{ lo: 'ຊື່, ເບີໂທ, ບັດ...',           en: 'Name, Phone, ID...' },
   stayCount:             { lo: 'ຄັ້ງ',                         en: 'stays' },
+  editGuestInfo:         { lo: 'ແກ້ໄຂຂໍ້ມູນ',                 en: 'Edit Info' },
   saveBooked:            { lo: 'ຈອງຫ້ອງ',                    en: 'Save as Booked' },
   checkInNow:            { lo: 'ເຊັກອິນທັນທີ',               en: 'Check In Now' },
   checkOutOptional:      { lo: 'ວັນອອກ (ຖ້າຮູ້)',             en: 'Check-out (if known)' },

@@ -350,6 +350,54 @@
 }
 .rp-btn--red-outline:hover { background: #fff0f0; }
 
+/* ── Confirmation modal ── */
+.rp-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20,30,80,0.42);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  animation: rp-fade 0.15s ease;
+}
+
+@keyframes rp-fade { from { opacity: 0 } to { opacity: 1 } }
+
+.rp-confirm-box {
+  background: #fff;
+  border-radius: 14px;
+  padding: 32px 28px 24px;
+  max-width: 340px;
+  width: 100%;
+  box-shadow: 0 16px 48px rgba(20,30,80,0.22);
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  animation: rp-slide 0.18s ease;
+}
+
+@keyframes rp-slide {
+  from { transform: translateY(14px); opacity: 0 }
+  to   { transform: translateY(0);    opacity: 1 }
+}
+
+.rp-confirm-msg {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  text-align: center;
+  line-height: 1.55;
+}
+
+.rp-confirm-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.rp-confirm-btn { flex: 1; }
+
 /* ── Responsive ── */
 @media (max-width: 640px) {
   .rp-body {
