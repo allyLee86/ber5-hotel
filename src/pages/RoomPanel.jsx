@@ -25,12 +25,15 @@ export default function RoomPanel({ room, onSave, onCancel }) {
 
   /* ── Panel A: vacancy form state ── */
   const [form, setForm] = useState({
+    nickName:   '',
     firstName:  '',
     middleName: '',
     lastName:   '',
     age:        '',
     gender:     '',
     phone:      '',
+    idCard:     '',
+    passportId: '',
     checkIn:    '',
     checkOut:   '',
   });
@@ -49,7 +52,6 @@ export default function RoomPanel({ room, onSave, onCancel }) {
   const checkInDate   = gd?.checkIn ?? '';
   const coNights      = calcNights(checkInDate, checkOutDate);
   const coTotal       = coNights * price;
-  const fullName      = [gd?.firstName, gd?.middleName, gd?.lastName].filter(Boolean).join(' ') || '—';
   const genderLabel   = gd?.gender ? (t[gd.gender]?.[lang] ?? gd.gender) : '—';
 
   function handleChange(field, value) {
@@ -59,8 +61,7 @@ export default function RoomPanel({ room, onSave, onCancel }) {
 
   function validate(f) {
     const e = {};
-    if (!f.firstName.trim()) e.firstName = true;
-    if (!f.checkIn)          e.checkIn   = true;
+    if (!f.checkIn) e.checkIn = true;
     return e;
   }
 
@@ -118,30 +119,33 @@ export default function RoomPanel({ room, onSave, onCancel }) {
                 <h2 className="rp-section-title">{t.guestInfo[lang]}</h2>
                 <div className="rp-divider" />
 
-                <div className={`rp-field ${errors.firstName ? 'rp-field--error' : ''}`}>
-                  <label className="rp-label">
-                    {t.firstName[lang]} <span className="rp-required">*</span>
-                  </label>
+                <div className="rp-field">
+                  <label className="rp-label">{t.nickName[lang]}</label>
                   <input
                     className="rp-input"
                     type="text"
-                    value={form.firstName}
-                    onChange={e => handleChange('firstName', e.target.value)}
+                    value={form.nickName}
+                    onChange={e => handleChange('nickName', e.target.value)}
                   />
-                  {errors.firstName && <span className="rp-error-msg">{t.required[lang]}</span>}
                 </div>
 
                 <div className="rp-row">
+                  <div className="rp-field rp-field--flex">
+                    <label className="rp-label">{t.firstName[lang]}</label>
+                    <input className="rp-input" type="text" value={form.firstName}
+                      onChange={e => handleChange('firstName', e.target.value)} />
+                  </div>
                   <div className="rp-field rp-field--flex">
                     <label className="rp-label">{t.middleName[lang]}</label>
                     <input className="rp-input" type="text" value={form.middleName}
                       onChange={e => handleChange('middleName', e.target.value)} />
                   </div>
-                  <div className="rp-field rp-field--flex">
-                    <label className="rp-label">{t.lastName[lang]}</label>
-                    <input className="rp-input" type="text" value={form.lastName}
-                      onChange={e => handleChange('lastName', e.target.value)} />
-                  </div>
+                </div>
+
+                <div className="rp-field">
+                  <label className="rp-label">{t.lastName[lang]}</label>
+                  <input className="rp-input" type="text" value={form.lastName}
+                    onChange={e => handleChange('lastName', e.target.value)} />
                 </div>
 
                 <div className="rp-row">
@@ -166,6 +170,19 @@ export default function RoomPanel({ room, onSave, onCancel }) {
                   <label className="rp-label">{t.phone[lang]}</label>
                   <input className="rp-input" type="tel" value={form.phone}
                     onChange={e => handleChange('phone', e.target.value)} />
+                </div>
+
+                <div className="rp-row">
+                  <div className="rp-field rp-field--flex">
+                    <label className="rp-label">{t.idCard[lang]}</label>
+                    <input className="rp-input" type="text" value={form.idCard}
+                      onChange={e => handleChange('idCard', e.target.value)} />
+                  </div>
+                  <div className="rp-field rp-field--flex">
+                    <label className="rp-label">{t.passportId[lang]}</label>
+                    <input className="rp-input" type="text" value={form.passportId}
+                      onChange={e => handleChange('passportId', e.target.value)} />
+                  </div>
                 </div>
               </div>
 
@@ -214,10 +231,15 @@ export default function RoomPanel({ room, onSave, onCancel }) {
           {room.status === 'booked' && (
             <>
               <ReadSection title={t.guestInfo[lang]}>
-                <ReadRow label={t.firstName[lang]} value={fullName} />
-                <ReadRow label={t.age[lang]}       value={gd?.age} />
-                <ReadRow label={t.gender[lang]}    value={genderLabel} />
-                <ReadRow label={t.phone[lang]}     value={gd?.phone} />
+                <ReadRow label={t.nickName[lang]}   value={gd?.nickName} />
+                <ReadRow label={t.firstName[lang]}  value={gd?.firstName} />
+                <ReadRow label={t.middleName[lang]} value={gd?.middleName} />
+                <ReadRow label={t.lastName[lang]}   value={gd?.lastName} />
+                <ReadRow label={t.age[lang]}        value={gd?.age} />
+                <ReadRow label={t.gender[lang]}     value={genderLabel} />
+                <ReadRow label={t.phone[lang]}      value={gd?.phone} />
+                <ReadRow label={t.idCard[lang]}     value={gd?.idCard} />
+                <ReadRow label={t.passportId[lang]} value={gd?.passportId} />
               </ReadSection>
               <ReadSection title={t.stayPeriod[lang]}>
                 <ReadRow label={t.checkIn[lang]}  value={fmtDate(gd?.checkIn)} />
@@ -230,11 +252,16 @@ export default function RoomPanel({ room, onSave, onCancel }) {
           {room.status === 'occupied' && (
             <>
               <ReadSection title={t.guestInfo[lang]}>
-                <ReadRow label={t.firstName[lang]} value={fullName} />
-                <ReadRow label={t.age[lang]}       value={gd?.age} />
-                <ReadRow label={t.gender[lang]}    value={genderLabel} />
-                <ReadRow label={t.phone[lang]}     value={gd?.phone} />
-                <ReadRow label={t.checkIn[lang]}   value={fmtDate(checkInDate)} />
+                <ReadRow label={t.nickName[lang]}   value={gd?.nickName} />
+                <ReadRow label={t.firstName[lang]}  value={gd?.firstName} />
+                <ReadRow label={t.middleName[lang]} value={gd?.middleName} />
+                <ReadRow label={t.lastName[lang]}   value={gd?.lastName} />
+                <ReadRow label={t.age[lang]}        value={gd?.age} />
+                <ReadRow label={t.gender[lang]}     value={genderLabel} />
+                <ReadRow label={t.phone[lang]}      value={gd?.phone} />
+                <ReadRow label={t.idCard[lang]}     value={gd?.idCard} />
+                <ReadRow label={t.passportId[lang]} value={gd?.passportId} />
+                <ReadRow label={t.checkIn[lang]}    value={fmtDate(checkInDate)} />
               </ReadSection>
 
               <div className="rp-section">

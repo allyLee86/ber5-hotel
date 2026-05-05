@@ -1,0 +1,315 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;600;700&display=swap');
+
+:root {
+  --primary:    #0077b6;
+  --primary-dk: #005f8e;
+  --primary-lt: #e0f4f9;
+  --orange:     #E8840A;
+  --border:     #d0d4ee;
+  --text:       #1a1f3c;
+  --muted:      #7a85b0;
+  --error:      #d32f2f;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+.sh-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #f4f5fb;
+  font-family: 'Noto Sans Lao', 'Segoe UI', sans-serif;
+  color: var(--text);
+}
+
+/* ── Top bar ── */
+.sh-topbar {
+  display: flex;
+  align-items: center;
+  background: var(--primary);
+  color: #fff;
+  height: 52px;
+  padding: 0 20px;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.sh-back-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.sh-back-btn:hover { background: rgba(255,255,255,0.15); }
+
+.sh-title {
+  flex: 1;
+  text-align: center;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sh-lang-pill {
+  background: rgba(255,255,255,0.18);
+  border: 1.5px solid rgba(255,255,255,0.5);
+  color: #fff;
+  border-radius: 20px;
+  padding: 4px 14px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.sh-lang-pill:hover { background: rgba(255,255,255,0.3); }
+
+/* ── Filters strip ── */
+.sh-filters {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+  background: #fff;
+  border-bottom: 1.5px solid var(--border);
+  padding: 12px 24px;
+  flex-shrink: 0;
+}
+
+.sh-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.sh-filter-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.sh-date-input {
+  border: none;
+  border-bottom: 1.5px solid var(--border);
+  outline: none;
+  padding: 4px 2px;
+  font-size: 0.86rem;
+  font-family: inherit;
+  color: var(--text);
+  background: transparent;
+  transition: border-color 0.18s;
+  width: 140px;
+}
+.sh-date-input:focus { border-bottom-color: var(--primary); }
+
+.sh-filter-dash {
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 1rem;
+  padding-bottom: 4px;
+  flex-shrink: 0;
+}
+
+/* Search */
+.sh-search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1.5px solid var(--border);
+  padding-bottom: 4px;
+  color: var(--muted);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.sh-search {
+  border: none;
+  outline: none;
+  font-size: 0.86rem;
+  font-family: inherit;
+  color: var(--text);
+  background: transparent;
+  width: 200px;
+}
+.sh-search::placeholder { color: var(--muted); }
+
+.sh-search-clear {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.82rem;
+  padding: 2px 4px;
+  border-radius: 4px;
+  line-height: 1;
+  transition: color 0.15s;
+}
+.sh-search-clear:hover { color: var(--text); }
+
+/* ── Summary bar ── */
+.sh-summary {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: var(--primary);
+  color: #fff;
+  padding: 10px 24px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.sh-summary-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 0 20px;
+}
+
+.sh-summary-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  opacity: 0.75;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.sh-summary-value {
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.sh-summary-value--hl {
+  color: #ffe082;
+}
+
+.sh-summary-divider {
+  width: 1px;
+  height: 36px;
+  background: rgba(255,255,255,0.25);
+  flex-shrink: 0;
+}
+
+/* ── Table area ── */
+.sh-table-wrap {
+  flex: 1;
+  overflow-x: auto;
+  padding: 20px 24px;
+}
+
+.sh-empty {
+  text-align: center;
+  color: var(--muted);
+  padding: 72px 0;
+  font-size: 0.95rem;
+}
+
+.sh-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 16px rgba(59,79,191,0.09);
+  font-size: 0.85rem;
+}
+
+.sh-table thead {
+  background: var(--primary);
+  color: #fff;
+}
+
+.sh-table th {
+  padding: 11px 14px;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.sh-table td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.sh-table tbody tr:last-child td { border-bottom: none; }
+.sh-table tbody tr:hover { background: #f8f9ff; }
+
+.sh-cell-invoice {
+  font-weight: 700;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.sh-cell-name {
+  font-weight: 600;
+  color: var(--text);
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sh-cell-room {
+  font-weight: 800;
+  color: var(--primary);
+  font-size: 1rem;
+  text-align: center;
+}
+
+.sh-cell-center { text-align: center; font-weight: 600; }
+
+.sh-cell-total {
+  font-weight: 700;
+  color: var(--text);
+  text-align: right;
+}
+
+/* ── View button ── */
+.sh-view-btn {
+  background: var(--primary-lt);
+  color: var(--primary);
+  border: 1.5px solid var(--primary);
+  border-radius: 6px;
+  padding: 5px 14px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+.sh-view-btn:hover { background: var(--primary); color: #fff; }
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .sh-filters { padding: 10px 14px; gap: 10px; }
+  .sh-table-wrap { padding: 12px 8px; }
+  .sh-summary { padding: 8px 12px; }
+  .sh-summary-item { padding: 0 10px; }
+  .sh-search { width: 140px; }
+  .sh-search-wrap { margin-left: 0; }
+}
+
+@media (max-width: 480px) {
+  .sh-table th:nth-child(4),
+  .sh-table td:nth-child(4) { display: none; }
+  .sh-table th:nth-child(1),
+  .sh-table td:nth-child(1) { display: none; }
+}

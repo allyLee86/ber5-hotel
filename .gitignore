@@ -5,6 +5,8 @@
 /.pnp
 .pnp.js
 
+#support
+/figma design
 # testing
 /coverage
 

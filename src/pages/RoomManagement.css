@@ -1,0 +1,310 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;600;700&display=swap');
+
+:root {
+  --primary:    #0077b6;
+  --primary-dk: #005f8e;
+  --primary-lt: #e0f4f9;
+  --orange:     #E8840A;
+  --red:        #c62828;
+  --error:      #d32f2f;
+  --border:     #d0d4ee;
+  --text:       #1a1f3c;
+  --muted:      #7a85b0;
+  --vacant-bg:  #e8f5e9;
+  --vacant-fg:  #2e7d32;
+  --occupied-bg:#e3f2fd;
+  --occupied-fg:#1565c0;
+  --booked-bg:  #fff3e0;
+  --booked-fg:  #e65100;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+.rm-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #f4f5fb;
+  font-family: 'Noto Sans Lao', 'Segoe UI', sans-serif;
+  color: var(--text);
+}
+
+/* ── Top bar ── */
+.rm-topbar {
+  display: flex;
+  align-items: center;
+  background: var(--primary);
+  color: #fff;
+  height: 52px;
+  padding: 0 20px;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.rm-back-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.rm-back-btn:hover { background: rgba(255,255,255,0.15); }
+
+.rm-title {
+  flex: 1;
+  text-align: center;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rm-lang-pill {
+  background: rgba(255,255,255,0.18);
+  border: 1.5px solid rgba(255,255,255,0.5);
+  color: #fff;
+  border-radius: 20px;
+  padding: 4px 14px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.rm-lang-pill:hover { background: rgba(255,255,255,0.3); }
+
+/* ── Body: table + panel ── */
+.rm-body {
+  display: flex;
+  flex: 1;
+  align-items: flex-start;
+  max-width: 1100px;
+  width: 100%;
+  margin: 28px auto;
+  padding: 0 20px;
+  gap: 24px;
+}
+
+/* ── LEFT: table wrap ── */
+.rm-table-wrap {
+  flex: 1;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 4px 24px rgba(59,79,191,0.1);
+  overflow: hidden;
+  overflow-x: auto;
+}
+
+.rm-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.rm-table thead {
+  background: var(--primary);
+  color: #fff;
+}
+
+.rm-table th {
+  padding: 12px 14px;
+  text-align: left;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.rm-table td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.rm-table tbody tr:last-child td { border-bottom: none; }
+
+.rm-table tbody tr:hover { background: #f8f9ff; }
+
+.rm-row--active { background: var(--primary-lt) !important; }
+
+.rm-cell-num {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--primary);
+  min-width: 52px;
+}
+
+.rm-cell-actions {
+  white-space: nowrap;
+  min-width: 80px;
+}
+
+/* ── Status badge ── */
+.rm-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+.rm-badge--vacant   { background: var(--vacant-bg);   color: var(--vacant-fg); }
+.rm-badge--occupied { background: var(--occupied-bg); color: var(--occupied-fg); }
+.rm-badge--booked   { background: var(--booked-bg);   color: var(--booked-fg); }
+
+/* ── Icon action buttons ── */
+.rm-icon-btn {
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+  margin-right: 2px;
+}
+
+.rm-icon-btn--edit { color: var(--primary); }
+.rm-icon-btn--edit:hover { background: var(--primary-lt); }
+
+.rm-icon-btn--del { color: var(--red); }
+.rm-icon-btn--del:hover { background: #fff0f0; }
+
+/* ── RIGHT: add/edit panel ── */
+.rm-panel {
+  width: 280px;
+  flex-shrink: 0;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 4px 24px rgba(59,79,191,0.1);
+  padding: 24px 22px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.rm-panel-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.rm-divider {
+  height: 1.5px;
+  background: var(--border);
+  margin-top: -8px;
+}
+
+/* ── Form fields ── */
+.rm-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rm-label {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.rm-required {
+  color: var(--error);
+  margin-left: 2px;
+}
+
+.rm-input {
+  border: none;
+  border-bottom: 1.5px solid var(--border);
+  outline: none;
+  padding: 6px 2px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: var(--text);
+  background: transparent;
+  transition: border-color 0.18s;
+  width: 100%;
+}
+.rm-input:focus { border-bottom-color: var(--primary); }
+.rm-field--error .rm-input { border-bottom-color: var(--error); }
+
+.rm-input--readonly {
+  color: var(--muted);
+  cursor: default;
+}
+
+.rm-select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a85b0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 4px center;
+  padding-right: 22px;
+}
+
+.rm-error-msg {
+  font-size: 0.72rem;
+  color: var(--error);
+}
+
+/* ── Panel buttons ── */
+.rm-btn {
+  width: 100%;
+  border-radius: 8px;
+  padding: 11px 0;
+  font-size: 0.88rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s, box-shadow 0.15s, color 0.15s;
+  border: none;
+}
+
+.rm-btn--primary {
+  background: var(--primary);
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(59,79,191,0.3);
+}
+.rm-btn--primary:hover { background: var(--primary-dk); }
+
+.rm-btn--outline {
+  background: #fff;
+  color: var(--primary);
+  border: 1.8px solid var(--primary);
+}
+.rm-btn--outline:hover { background: var(--primary-lt); }
+
+/* ── Responsive ── */
+@media (max-width: 720px) {
+  .rm-body {
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    gap: 0;
+  }
+
+  .rm-table-wrap {
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .rm-panel {
+    width: 100%;
+    border-radius: 0;
+    box-shadow: none;
+    border-top: 2px solid var(--border);
+  }
+}

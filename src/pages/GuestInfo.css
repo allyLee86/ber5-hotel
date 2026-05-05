@@ -1,0 +1,509 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;600;700&display=swap');
+
+:root {
+  --primary:      #0077b6;
+  --primary-dk:   #005f8e;
+  --primary-lt:   #e0f4f9;
+  --orange:       #E8840A;
+  --orange-lt:    #fff3e0;
+  --border:       #d0d4ee;
+  --text:         #1a1f3c;
+  --muted:        #7a85b0;
+  --occupied-bg:  #0077b6;
+  --booked-bg:    #E8840A;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+.gi-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #f4f5fb;
+  font-family: 'Noto Sans Lao', 'Segoe UI', sans-serif;
+  color: var(--text);
+}
+
+/* ── Top bar ── */
+.gi-topbar {
+  display: flex;
+  align-items: center;
+  background: var(--primary);
+  color: #fff;
+  height: 52px;
+  padding: 0 20px;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.gi-back-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.gi-back-btn:hover { background: rgba(255,255,255,0.15); }
+
+.gi-title {
+  flex: 1;
+  text-align: center;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gi-lang-pill {
+  background: rgba(255,255,255,0.18);
+  border: 1.5px solid rgba(255,255,255,0.5);
+  color: #fff;
+  border-radius: 20px;
+  padding: 4px 14px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.gi-lang-pill:hover { background: rgba(255,255,255,0.3); }
+
+/* ── Search bar ── */
+.gi-searchbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff;
+  border-bottom: 1.5px solid var(--border);
+  padding: 12px 24px;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.gi-search-icon {
+  flex-shrink: 0;
+  opacity: 0.5;
+}
+
+.gi-search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 0.92rem;
+  font-family: inherit;
+  color: var(--text);
+  background: transparent;
+}
+
+.gi-search-input::placeholder { color: var(--muted); }
+
+.gi-search-clear {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.88rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  line-height: 1;
+  transition: color 0.15s;
+}
+.gi-search-clear:hover { color: var(--text); }
+
+/* ── Guest list ── */
+.gi-list {
+  flex: 1;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 860px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* ── Empty state ── */
+.gi-empty {
+  text-align: center;
+  color: var(--muted);
+  padding: 64px 0;
+  font-size: 0.95rem;
+}
+
+/* ── Avatar circle ── */
+.gi-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #fff;
+  flex-shrink: 0;
+  letter-spacing: -0.5px;
+}
+.gi-avatar--identified { background: var(--primary); }
+.gi-avatar--anonymous  { background: #78909c; }
+
+.gi-avatar--lg {
+  width: 68px;
+  height: 68px;
+  font-size: 1.5rem;
+  border-radius: 50%;
+}
+
+/* ── Guest type chip ── */
+.gi-type-chip {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 20px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.gi-type-chip--identified { background: #e3f2fd; color: #1565c0; }
+.gi-type-chip--anonymous  { background: #eceff1; color: #546e7a; }
+
+/* ── Guest card ── */
+.gi-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #fff;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+  transition: box-shadow 0.15s, border-color 0.15s, transform 0.1s;
+  width: 100%;
+}
+.gi-card:hover {
+  box-shadow: 0 4px 18px rgba(59,79,191,0.13);
+  border-color: var(--primary);
+  transform: translateY(-1px);
+}
+
+/* ── Room number badge ── */
+.gi-num-badge {
+  width: 52px;
+  height: 52px;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 1.25rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  letter-spacing: -0.5px;
+}
+
+.gi-num-badge--occupied { background: var(--occupied-bg); }
+.gi-num-badge--booked   { background: var(--booked-bg); }
+
+.gi-num-badge--lg {
+  width: 68px;
+  height: 68px;
+  border-radius: 14px;
+  font-size: 1.7rem;
+}
+
+/* ── Card body (middle section) ── */
+.gi-card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.gi-card-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.gi-card-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gi-card-meta {
+  font-size: 0.75rem;
+  color: var(--muted);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 2px;
+}
+
+.gi-card-phone {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.gi-current-badge {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border-radius: 20px;
+  padding: 2px 9px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.gi-stay-count {
+  color: var(--muted);
+  font-size: 0.73rem;
+}
+
+/* ── Status chip ── */
+.gi-status-chip {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.gi-status-chip--occupied { background: #e3f2fd; color: #1565c0; }
+.gi-status-chip--booked   { background: #fff3e0; color: #e65100; }
+
+/* ── Chevron ── */
+.gi-chevron {
+  color: var(--muted);
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+
+/* ── Modal overlay ── */
+.gi-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20,30,80,0.42);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  animation: gi-fade 0.15s ease;
+}
+
+@keyframes gi-fade { from { opacity: 0 } to { opacity: 1 } }
+
+/* ── Modal box ── */
+.gi-modal {
+  background: #fff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 440px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 28px 26px 24px;
+  position: relative;
+  box-shadow: 0 16px 48px rgba(20,30,80,0.22);
+  animation: gi-slide 0.18s ease;
+}
+
+@keyframes gi-slide {
+  from { transform: translateY(14px); opacity: 0 }
+  to   { transform: translateY(0);    opacity: 1 }
+}
+
+.gi-modal-x {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 0.95rem;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+  line-height: 1;
+  transition: color 0.15s, background 0.15s;
+}
+.gi-modal-x:hover { color: var(--text); background: #f0f2fa; }
+
+/* ── Modal header ── */
+.gi-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.gi-modal-header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.gi-modal-name {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+.gi-modal-sub {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+/* ── Modal divider ── */
+.gi-modal-rule {
+  height: 1.5px;
+  background: var(--border);
+  margin: 16px 0;
+}
+
+/* ── Modal section ── */
+.gi-modal-section-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 10px;
+}
+
+.gi-modal-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-left: 4px;
+}
+
+.gi-modal-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.gi-modal-label {
+  font-size: 0.78rem;
+  color: var(--muted);
+  min-width: 110px;
+  flex-shrink: 0;
+}
+
+.gi-modal-value {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+  flex: 1;
+  padding-bottom: 2px;
+}
+
+/* ── Modal no-stays message ── */
+.gi-modal-no-stays {
+  font-size: 0.82rem;
+  color: var(--muted);
+  padding: 8px 0 4px;
+}
+
+/* ── Stay history table ── */
+.gi-stays-wrap {
+  overflow-x: auto;
+  margin-bottom: 4px;
+}
+
+.gi-stays-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+}
+
+.gi-stays-table th {
+  text-align: left;
+  font-weight: 700;
+  color: var(--muted);
+  padding: 4px 8px 6px 0;
+  border-bottom: 1.5px solid var(--border);
+  white-space: nowrap;
+}
+
+.gi-stays-table td {
+  padding: 6px 8px 6px 0;
+  border-bottom: 1px solid #f0f2fa;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.gi-stays-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.gi-stay-status {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.gi-stay-status--current   { background: #e8f5e9; color: #2e7d32; }
+.gi-stay-status--completed { background: #f3f4f8; color: var(--muted); }
+
+/* ── Modal close button ── */
+.gi-modal-close-btn {
+  display: block;
+  width: 100%;
+  margin-top: 20px;
+  padding: 11px 0;
+  background: #fff;
+  color: var(--primary);
+  border: 1.8px solid var(--primary);
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.gi-modal-close-btn:hover { background: var(--primary-lt); }
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .gi-list { padding: 14px 12px; }
+
+  .gi-card { padding: 12px 12px; gap: 12px; }
+
+  .gi-num-badge { width: 44px; height: 44px; font-size: 1.05rem; border-radius: 8px; }
+
+  .gi-card-meta { flex-direction: column; gap: 2px; }
+  .gi-meta-sep { display: none; }
+
+  .gi-status-chip { display: none; }
+
+  .gi-modal { padding: 22px 18px 20px; }
+  .gi-modal-label { min-width: 90px; }
+}

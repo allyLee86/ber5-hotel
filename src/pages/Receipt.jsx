@@ -37,8 +37,6 @@ export default function Receipt({ checkout, onBack }) {
   const price       = PRICES[room?.type]     ?? 80000;
   const typeKey     = ROOM_TYPES[room?.type] ?? 'twinSmall';
   const genderLabel = guest?.gender ? (t[guest.gender]?.[lang] ?? guest.gender) : '—';
-  const fullName    = [guest?.firstName, guest?.middleName, guest?.lastName]
-    .filter(Boolean).join(' ') || '—';
 
   return (
     <div className="rc-root">
@@ -80,10 +78,13 @@ export default function Receipt({ checkout, onBack }) {
                 <h3 className="rc-section-title">{t.guestInfo[lang]}</h3>
                 <div className="rc-section-rule" />
                 <div className="rc-rows">
-                  <Row label={t.firstName[lang]} value={fullName}              strong />
-                  <Row label={t.age[lang]}        value={guest?.age  || '—'} />
-                  <Row label={t.gender[lang]}     value={genderLabel}         />
-                  <Row label={t.phone[lang]}      value={guest?.phone || '—'} />
+                  <Row label={t.nickName[lang]}   value={guest?.nickName   || '—'} strong />
+                  <Row label={t.firstName[lang]}  value={guest?.firstName  || '—'} />
+                  <Row label={t.middleName[lang]} value={guest?.middleName || '—'} />
+                  <Row label={t.lastName[lang]}   value={guest?.lastName   || '—'} />
+                  <Row label={t.age[lang]}        value={guest?.age        || '—'} />
+                  <Row label={t.gender[lang]}     value={genderLabel}              />
+                  <Row label={t.phone[lang]}      value={guest?.phone      || '—'} />
                 </div>
               </div>
 

@@ -19,12 +19,15 @@ export default function CheckIn({ room, onBack, onConfirm }) {
   const roomId     = room?.num ?? '??';
 
   const [form, setForm] = useState({
+    nickName: '',
     firstName: '',
     middleName: '',
     lastName: '',
     age: '',
     gender: '',
     phone: '',
+    idCard: '',
+    passportId: '',
     checkIn: '',
     checkOut: '',
   });
@@ -47,9 +50,8 @@ export default function CheckIn({ room, onBack, onConfirm }) {
 
   function validate(f) {
     const e = {};
-    if (!f.firstName.trim()) e.firstName = true;
-    if (!f.checkIn)           e.checkIn  = true;
-    if (!f.checkOut)          e.checkOut = true;
+    if (!f.checkIn)  e.checkIn  = true;
+    if (!f.checkOut) e.checkOut = true;
     if (f.checkIn && f.checkOut && new Date(f.checkOut) <= new Date(f.checkIn))
       e.checkOut = true;
     return e;
@@ -102,24 +104,28 @@ export default function CheckIn({ room, onBack, onConfirm }) {
             <h2 className="ci-section-title">{t.guestInfo[lang]}</h2>
             <div className="ci-divider" />
 
-            {/* First name (full width, required) */}
-            <div className={`ci-field ${errors.firstName ? 'ci-field--error' : ''}`}>
-              <label className="ci-label">
-                {t.firstName[lang]} <span className="ci-required">*</span>
-              </label>
+            {/* Nick name (full width, optional) */}
+            <div className="ci-field">
+              <label className="ci-label">{t.nickName[lang]}</label>
               <input
                 className="ci-input"
                 type="text"
-                value={form.firstName}
-                onChange={e => handleChange('firstName', e.target.value)}
+                value={form.nickName}
+                onChange={e => handleChange('nickName', e.target.value)}
               />
-              {errors.firstName && (
-                <span className="ci-error-msg">{t.required[lang]}</span>
-              )}
             </div>
 
-            {/* Middle name | Last name */}
+            {/* First name | Middle name */}
             <div className="ci-row">
+              <div className="ci-field ci-field--flex">
+                <label className="ci-label">{t.firstName[lang]}</label>
+                <input
+                  className="ci-input"
+                  type="text"
+                  value={form.firstName}
+                  onChange={e => handleChange('firstName', e.target.value)}
+                />
+              </div>
               <div className="ci-field ci-field--flex">
                 <label className="ci-label">{t.middleName[lang]}</label>
                 <input
@@ -129,15 +135,17 @@ export default function CheckIn({ room, onBack, onConfirm }) {
                   onChange={e => handleChange('middleName', e.target.value)}
                 />
               </div>
-              <div className="ci-field ci-field--flex">
-                <label className="ci-label">{t.lastName[lang]}</label>
-                <input
-                  className="ci-input"
-                  type="text"
-                  value={form.lastName}
-                  onChange={e => handleChange('lastName', e.target.value)}
-                />
-              </div>
+            </div>
+
+            {/* Last name */}
+            <div className="ci-field">
+              <label className="ci-label">{t.lastName[lang]}</label>
+              <input
+                className="ci-input"
+                type="text"
+                value={form.lastName}
+                onChange={e => handleChange('lastName', e.target.value)}
+              />
             </div>
 
             {/* Age | Gender */}
@@ -177,6 +185,28 @@ export default function CheckIn({ room, onBack, onConfirm }) {
                 value={form.phone}
                 onChange={e => handleChange('phone', e.target.value)}
               />
+            </div>
+
+            {/* ID Card | Passport */}
+            <div className="ci-row">
+              <div className="ci-field ci-field--flex">
+                <label className="ci-label">{t.idCard[lang]}</label>
+                <input
+                  className="ci-input"
+                  type="text"
+                  value={form.idCard}
+                  onChange={e => handleChange('idCard', e.target.value)}
+                />
+              </div>
+              <div className="ci-field ci-field--flex">
+                <label className="ci-label">{t.passportId[lang]}</label>
+                <input
+                  className="ci-input"
+                  type="text"
+                  value={form.passportId}
+                  onChange={e => handleChange('passportId', e.target.value)}
+                />
+              </div>
             </div>
           </div>
 

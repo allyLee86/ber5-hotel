@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import Login from './pages/Login';
-import AdminMenu from './pages/AdminMenu';
-import Dashboard from './pages/Dashboard';
-import RoomPanel from './pages/RoomPanel';
-import Receipt from './pages/Receipt';
-import { useLanguage } from './context/LanguageContext';
-import { t } from './i18n/translations';
+import Login          from './pages/Login';
+import AdminMenu      from './pages/AdminMenu';
+import Dashboard      from './pages/Dashboard';
+import RoomPanel      from './pages/RoomPanel';
+import Receipt        from './pages/Receipt';
+import GuestInfo      from './pages/GuestInfo';
+import StayHistory    from './pages/StayHistory';
+import RoomManagement from './pages/RoomManagement';
+import UserManagement from './pages/UserManagement';
 import { initialRooms, PRICES } from './data/rooms';
 
 function calculateNights(checkIn, checkOut) {
@@ -14,54 +16,154 @@ function calculateNights(checkIn, checkOut) {
   return diff > 0 ? Math.round(diff) : 0;
 }
 
-/* AdminMenu fires legacy screen keys — map them to the new names */
-const SCREEN_MAP = { 'room-status': 'dashboard' };
+function detectGuestType(gd) {
+  return (gd.phone || gd.idCard || gd.passportId) ? 'identified' : 'anonymous';
+}
+
+function matchesGuest(guest, gd) {
+  if (gd.phone      && guest.phone      && gd.phone      === guest.phone)      return true;
+  if (gd.idCard     && guest.idCard     && gd.idCard     === guest.idCard)     return true;
+  if (gd.passportId && guest.passportId && gd.passportId === guest.passportId) return true;
+  return false;
+}
+
+function upsertGuest(prev, gd, room) {
+  const guestType = detectGuestType(gd);
+  const stay = {
+    id:       Date.now(),
+    roomNum:  room.num,
+    roomType: room.type,
+    checkIn:  gd.checkIn  ?? null,
+    checkOut: gd.checkOut ?? null,
+    nights:   null,
+    total:    null,
+    status:   'current',
+  };
+  const idx = prev.findIndex(g => matchesGuest(g, gd));
+  if (idx >= 0) {
+    const g = prev[idx];
+    const updated = { ...g, guestType, stays: [...g.stays, stay] };
+    ['nickName','firstName','middleName','lastName','age','gender','phone','idCard','passportId']
+      .forEach(k => { if (gd[k]) updated[k] = gd[k]; });
+    return prev.map((g2, i) => i === idx ? updated : g2);
+  }
+  return [...prev, {
+    id:         String(Date.now()),
+    nickName:   gd.nickName   ?? '',
+    firstName:  gd.firstName  ?? '',
+    middleName: gd.middleName ?? '',
+    lastName:   gd.lastName   ?? '',
+    age:        gd.age        ?? '',
+    gender:     gd.gender     ?? '',
+    phone:      gd.phone      ?? '',
+    idCard:     gd.idCard     ?? '',
+    passportId: gd.passportId ?? '',
+    guestType,
+    stays: [stay],
+  }];
+}
+
+function completeGuestStay(prev, roomNum, checkOutDate, nights, total) {
+  return prev.map(g => {
+    const hasCurrent = g.stays.some(s => s.roomNum === roomNum && s.status === 'current');
+    if (!hasCurrent) return g;
+    return {
+      ...g,
+      stays: g.stays.map(s =>
+        s.roomNum === roomNum && s.status === 'current'
+          ? { ...s, checkOut: checkOutDate, nights, total, status: 'completed' }
+          : s
+      ),
+    };
+  });
+}
+
+/* Map AdminMenu nav keys → internal screen names */
+const SCREEN_MAP = {
+  'room-status': 'dashboard',
+  'guests':      'guestinfo',
+  'history':     'stayhistory',
+  'rooms':       'roommanagement',
+  'users':       'usermanagement',
+};
 
 export default function App() {
-  const { lang } = useLanguage();
   const [screen, setScreen]             = useState('login');
   const [user, setUser]                 = useState(null);
   const [rooms, setRooms]               = useState(initialRooms);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [lastCheckout, setLastCheckout] = useState(null);
+  const [stayHistory, setStayHistory]   = useState([]);
+  const [guests, setGuests]             = useState([]);
+  const [users, setUsers]               = useState([
+    { id: 1, name: 'Admin', username: 'admin', role: 'admin', active: true },
+  ]);
 
-  function handleSelectRoom(room) {
-    setSelectedRoom(room);
-    setScreen('roompanel');
-  }
-
+  /* ── Room panel: save a single room, detect checkout ── */
   function handleSaveRoom(updatedRoom) {
     setRooms(prev => prev.map(r => r.num === updatedRoom.num ? updatedRoom : r));
 
+    const wasVacant   = selectedRoom?.status === 'vacant';
     const wasOccupied = selectedRoom?.status === 'occupied';
     const isNowVacant = updatedRoom.status === 'vacant';
+    const isNowActive = updatedRoom.status === 'occupied' || updatedRoom.status === 'booked';
+
+    if (wasVacant && isNowActive && updatedRoom.guestData) {
+      setGuests(prev => upsertGuest(prev, updatedRoom.guestData, updatedRoom));
+    }
 
     if (wasOccupied && isNowVacant) {
       const checkOutDate = new Date().toISOString().split('T')[0];
       const nights = calculateNights(selectedRoom.guestData?.checkIn, checkOutDate);
       const price  = PRICES[selectedRoom.type] ?? 80000;
       setLastCheckout({
-        guest:        selectedRoom.guestData,
-        room:         selectedRoom,
+        guest: selectedRoom.guestData,
+        room:  selectedRoom,
         checkOutDate,
         nights,
-        total:        nights * price,
+        total: nights * price,
         price,
       });
+      setStayHistory(prev => [...prev, {
+        id:          Date.now(),
+        guestData:   { ...selectedRoom.guestData },
+        room:        { num: selectedRoom.num, type: selectedRoom.type },
+        checkOutDate,
+        nights,
+        total:       nights * price,
+      }]);
+      setGuests(prev => completeGuestStay(prev, selectedRoom.num, checkOutDate, nights, nights * price));
       setScreen('receipt');
     } else {
       setScreen('dashboard');
     }
   }
 
+  /* ── Room management: save full rooms array ── */
+  function handleSaveRooms(updatedRooms) {
+    setRooms(updatedRooms);
+  }
+
+  /* ── User management: save full users array ── */
+  function handleSaveUsers(updatedUsers) {
+    setUsers(updatedUsers);
+  }
+
+  function handleSelectRoom(room) {
+    setSelectedRoom(room);
+    setScreen('roompanel');
+  }
+
   function handleNavigate(key) {
     setScreen(SCREEN_MAP[key] ?? key);
   }
 
-  /* ── Screens ── */
+  /* ── Screen router ── */
 
   if (screen === 'login') {
-    return <Login onLogin={u => { setUser(u); setScreen('adminmenu'); }} />;
+    return (
+      <Login onLogin={u => { setUser(u); setScreen('adminmenu'); }} />
+    );
   }
 
   if (screen === 'adminmenu') {
@@ -103,27 +205,43 @@ export default function App() {
     );
   }
 
-  /* ── Placeholder for unbuilt screens ── */
-  const screenLabel = {
-    'guest-info':      t.guestInfo,
-    'stay-history':    t.stayHistory,
-    'room-management': t.manageRooms,
-    'user-management': t.manageUsers,
-  };
-  const label = screenLabel[screen]?.[lang] ?? screen;
+  if (screen === 'guestinfo') {
+    return (
+      <GuestInfo
+        guests={guests}
+        onBack={() => setScreen('adminmenu')}
+      />
+    );
+  }
 
-  return (
-    <div style={{ minHeight: '100vh', background: '#3B4FBF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ background: '#fff', borderRadius: 16, padding: '40px 48px', textAlign: 'center', fontFamily: "'Noto Sans Lao', Segoe UI, sans-serif" }}>
-        <p style={{ color: '#3B4FBF', fontWeight: 700, fontSize: '1.1rem', marginBottom: 12 }}>{label}</p>
-        <p style={{ color: '#aaa', fontSize: '0.88rem', marginBottom: 24 }}>Coming soon…</p>
-        <button
-          onClick={() => setScreen('adminmenu')}
-          style={{ background: '#3B4FBF', color: '#fff', border: 'none', borderRadius: 8, padding: '10px 28px', cursor: 'pointer', fontWeight: 600, fontFamily: 'inherit' }}
-        >
-          &#8249; {t.back[lang]}
-        </button>
-      </div>
-    </div>
-  );
+  if (screen === 'stayhistory') {
+    return (
+      <StayHistory
+        history={stayHistory}
+        onBack={() => setScreen('adminmenu')}
+      />
+    );
+  }
+
+  if (screen === 'roommanagement') {
+    return (
+      <RoomManagement
+        rooms={rooms}
+        onSave={handleSaveRooms}
+        onBack={() => setScreen('adminmenu')}
+      />
+    );
+  }
+
+  if (screen === 'usermanagement') {
+    return (
+      <UserManagement
+        users={users}
+        onSave={handleSaveUsers}
+        onBack={() => setScreen('adminmenu')}
+      />
+    );
+  }
+
+  return null;
 }

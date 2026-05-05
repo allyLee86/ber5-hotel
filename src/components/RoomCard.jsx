@@ -11,7 +11,7 @@ function fmtCheckIn(iso) {
 
 export default function RoomCard({ room, onClick }) {
   const { lang } = useLanguage();
-  const guestFirst = room.guestData?.firstName ?? '';
+  const guestFirst = room.guestData?.nickName ?? room.guestData?.firstName ?? '';
   const checkInStr = fmtCheckIn(room.guestData?.checkIn);
 
   return (

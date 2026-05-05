@@ -4,11 +4,11 @@ import { t } from '../i18n/translations';
 import './AdminMenu.css';
 
 const NAV_ITEMS = [
-  { key: 'room-status',      tKey: 'roomStatus',   icon: <GridIcon /> },
-  { key: 'guest-info',       tKey: 'guestInfo',    icon: <GuestIcon /> },
-  { key: 'stay-history',     tKey: 'stayHistory',  icon: <HistoryIcon /> },
-  { key: 'room-management',  tKey: 'manageRooms',  icon: <RoomIcon /> },
-  { key: 'user-management',  tKey: 'manageUsers',  icon: <UsersIcon /> },
+  { key: 'room-status', tKey: 'roomStatus',   icon: <GridIcon /> },
+  { key: 'guests',      tKey: 'guestInfo',    icon: <GuestIcon /> },
+  { key: 'history',     tKey: 'stayHistory',  icon: <HistoryIcon /> },
+  { key: 'rooms',       tKey: 'manageRooms',  icon: <RoomIcon /> },
+  { key: 'users',       tKey: 'manageUsers',  icon: <UsersIcon /> },
 ];
 
 export default function AdminMenu({ user, onNavigate, onLogout }) {

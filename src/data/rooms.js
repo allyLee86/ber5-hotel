@@ -7,7 +7,7 @@ export const initialRooms = [
   {
     num: '02', type: 'twin-s', status: 'booked',
     guestData: {
-      firstName: 'ຄຳດີ',  middleName: '', lastName: 'ທ່າວ',
+      nickName: 'ຄຳດີ',   firstName: '', middleName: '', lastName: 'ທ່າວ',
       age: '32',           gender: 'male', phone: '020-5511-2233',
       checkIn:  '2023-02-14', checkOut: '',
     },
@@ -19,7 +19,7 @@ export const initialRooms = [
   {
     num: '06', type: 'twin-s', status: 'occupied',
     guestData: {
-      firstName: 'ເດືອນ', middleName: '', lastName: '',
+      nickName: 'ເດືອນ',  firstName: '', middleName: '', lastName: '',
       age: '28',           gender: 'female', phone: '030-2244-5566',
       checkIn:  '2023-02-12', checkOut: '2023-02-16',
     },
@@ -27,7 +27,7 @@ export const initialRooms = [
   {
     num: '08', type: 'twin-s', status: 'occupied',
     guestData: {
-      firstName: 'ຄຳຫລາ', middleName: '', lastName: '',
+      nickName: 'ຄຳຫລາ', firstName: '', middleName: '', lastName: '',
       age: '',              gender: '',      phone: '',
       checkIn:  '2023-02-10', checkOut: '',
     },
@@ -53,7 +53,7 @@ export const initialRooms = [
   {
     num: '18', type: 'twin-l', status: 'occupied',
     guestData: {
-      firstName: 'ກ',     middleName: '', lastName: 'ທ່າວ',
+      nickName: 'ກ',      firstName: '', middleName: '', lastName: 'ທ່າວ',
       age: '45',           gender: 'male', phone: '020-9988-7766',
       checkIn:  '2023-02-11', checkOut: '',
     },
@@ -74,7 +74,7 @@ export const initialRooms = [
   {
     num: '28', type: 'single-l', status: 'booked',
     guestData: {
-      firstName: 'ແສງ',  middleName: '', lastName: 'ທ່າວ',
+      nickName: 'ແສງ',   firstName: '', middleName: '', lastName: 'ທ່າວ',
       age: '38',          gender: 'male', phone: '021-3344-5599',
       checkIn:  '2023-02-15', checkOut: '',
     },
@@ -82,7 +82,7 @@ export const initialRooms = [
   {
     num: '29', type: 'single-l', status: 'occupied',
     guestData: {
-      firstName: 'ສົມໃຈ', middleName: '', lastName: '',
+      nickName: 'ສົມໃຈ', firstName: '', middleName: '', lastName: '',
       age: '25',            gender: 'female', phone: '020-7711-8822',
       checkIn:  '2023-02-13', checkOut: '2023-02-17',
     },
@@ -93,7 +93,7 @@ export const initialRooms = [
   {
     num: '33', type: 'single-l', status: 'booked',
     guestData: {
-      firstName: 'ສົມສີ', middleName: '', lastName: 'ທ່າວ',
+      nickName: 'ສົມສີ', firstName: '', middleName: '', lastName: 'ທ່າວ',
       age: '41',            gender: 'male', phone: '030-6655-4433',
       checkIn:  '2023-02-16', checkOut: '',
     },
@@ -104,12 +104,23 @@ export const initialRooms = [
 
 export function getGuestName(room) {
   if (!room.guestData) return '';
-  return [room.guestData.firstName, room.guestData.lastName]
+  return [room.guestData.nickName, room.guestData.firstName, room.guestData.lastName]
     .filter(Boolean)
     .join(' ');
 }
 
 export const ROOM_TYPE_KEYS = ['twin-s', 'twin-l', 'single-s', 'single-l'];
+
+export const TYPE_ORDER = ['twin-s', 'twin-l', 'single-s', 'single-l'];
+
+export function createRoom(num, type) {
+  return {
+    num,
+    type,
+    status: 'vacant',
+    guestData: null,
+  };
+}
 
 export const ROOM_TYPES = {
   'twin-s':   'twinSmall',
