@@ -108,6 +108,7 @@ export default function App() {
   const [screen, setScreen]             = useState('login');
   const [user, setUser]                 = useState(null);
   const [rooms, setRooms]               = useState(initialRooms);
+  const [prices, setPrices]             = useState(PRICES);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [lastCheckout, setLastCheckout] = useState(null);
   const [stayHistory, setStayHistory]   = useState([]);
@@ -142,7 +143,7 @@ export default function App() {
     if (wasOccupied && isNowVacant) {
       const checkOutDate = new Date().toISOString().split('T')[0];
       const nights = calculateNights(selectedRoom.guestData?.checkIn, checkOutDate);
-      const price  = PRICES[selectedRoom.type] ?? 80000;
+      const price  = { ...PRICES, ...prices }[selectedRoom.type] ?? 0;
       setLastCheckout({
         guest: selectedRoom.guestData,
         room:  selectedRoom,
@@ -256,6 +257,8 @@ export default function App() {
         rooms={rooms}
         onSave={handleSaveRooms}
         onBack={() => setScreen('adminmenu')}
+        prices={prices}
+        onSavePrices={setPrices}
       />
     );
   }

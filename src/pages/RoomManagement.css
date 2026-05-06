@@ -126,6 +126,20 @@
   white-space: nowrap;
 }
 
+.rm-th--sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s;
+}
+.rm-th--sortable:hover { background: var(--primary-dk); }
+
+.rm-sort-arrow {
+  margin-left: 5px;
+  font-size: 0.72rem;
+  vertical-align: middle;
+}
+.rm-sort-arrow--inactive { opacity: 0.35; }
+
 .rm-table td {
   padding: 11px 14px;
   border-bottom: 1px solid var(--border);
@@ -150,19 +164,6 @@
   min-width: 80px;
 }
 
-/* ── Status badge ── */
-.rm-badge {
-  display: inline-block;
-  padding: 3px 10px;
-  border-radius: 20px;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.3px;
-}
-.rm-badge--vacant   { background: var(--vacant-bg);   color: var(--vacant-fg); }
-.rm-badge--occupied { background: var(--occupied-bg); color: var(--occupied-fg); }
-.rm-badge--booked   { background: var(--booked-bg);   color: var(--booked-fg); }
-
 /* ── Icon action buttons ── */
 .rm-icon-btn {
   border: none;
@@ -183,10 +184,17 @@
 .rm-icon-btn--del { color: var(--red); }
 .rm-icon-btn--del:hover { background: #fff0f0; }
 
-/* ── RIGHT: add/edit panel ── */
-.rm-panel {
+/* ── RIGHT column ── */
+.rm-right-col {
   width: 280px;
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ── Add/edit panel + price panel ── */
+.rm-panel {
   background: #fff;
   border-radius: 14px;
   box-shadow: 0 4px 24px rgba(59,79,191,0.1);
@@ -246,6 +254,90 @@
   cursor: default;
 }
 
+/* ── Edit mode: blue highlight on all fields ── */
+.rm-panel--editing {
+  border: 2px solid var(--primary);
+  box-shadow: 0 4px 24px rgba(0, 119, 182, 0.18);
+}
+
+.rm-panel--editing .rm-input {
+  border-bottom: 2px solid var(--primary);
+  background: #f0f8fe;
+  border-radius: 4px 4px 0 0;
+  padding: 6px 6px 5px;
+}
+
+.rm-panel--editing .rm-input:focus {
+  background: #e0f4f9;
+  box-shadow: 0 2px 0 0 var(--primary);
+  outline: none;
+}
+
+.rm-panel--editing .rm-input[readonly] {
+  background: #f4f5fb;
+  color: var(--muted);
+}
+
+/* ── Price panel rows ── */
+.rm-price-panel { gap: 14px; }
+
+.rm-price-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.rm-price-label {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--text);
+  flex: 1;
+  white-space: nowrap;
+}
+
+.rm-price-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.rm-price-input {
+  width: 90px;
+  border: 1.5px solid var(--border);
+  border-radius: 7px;
+  padding: 6px 8px;
+  font-size: 0.88rem;
+  font-family: inherit;
+  color: var(--text);
+  text-align: right;
+  outline: none;
+  transition: border-color 0.18s, box-shadow 0.18s;
+  background: #f8f9ff;
+}
+.rm-price-input:focus {
+  border-color: var(--primary);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(0,119,182,0.12);
+}
+.rm-price-input--error { border-color: var(--error); }
+
+.rm-price-unit {
+  font-size: 0.7rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.rm-price-saved {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #2e7d32;
+  background: #e8f5e9;
+  border-radius: 6px;
+  padding: 6px 10px;
+  text-align: center;
+}
+
 .rm-select {
   cursor: pointer;
   appearance: none;
@@ -287,6 +379,67 @@
 }
 .rm-btn--outline:hover { background: var(--primary-lt); }
 
+.rm-btn--danger {
+  background: var(--red);
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(198, 40, 40, 0.25);
+}
+.rm-btn--danger:hover { background: #a31515; }
+
+/* ── Delete confirm modal ── */
+.rm-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: rm-fade-in 0.15s ease;
+}
+
+@keyframes rm-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.rm-modal {
+  background: #fff;
+  border-radius: 14px;
+  padding: 28px 28px 24px;
+  width: 320px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.22);
+  animation: rm-slide-up 0.18s ease;
+}
+
+@keyframes rm-slide-up {
+  from { transform: translateY(12px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.rm-modal-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--red);
+  margin-bottom: 10px;
+}
+
+.rm-modal-msg {
+  font-size: 0.88rem;
+  color: var(--text);
+  margin-bottom: 22px;
+  line-height: 1.6;
+}
+
+.rm-modal-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.rm-modal-actions .rm-btn {
+  flex: 1;
+}
+
 /* ── Responsive ── */
 @media (max-width: 720px) {
   .rm-body {
@@ -301,8 +454,12 @@
     box-shadow: none;
   }
 
-  .rm-panel {
+  .rm-right-col {
     width: 100%;
+    gap: 0;
+  }
+
+  .rm-panel {
     border-radius: 0;
     box-shadow: none;
     border-top: 2px solid var(--border);

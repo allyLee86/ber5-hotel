@@ -104,4 +104,8 @@ export const t = {
   totalStays:            { lo: 'ຈຳນວນທັງໝົດ',                en: 'Total stays' },
   totalRevenue:          { lo: 'ລາຍຮັບທັງໝົດ',               en: 'Total revenue' },
   guestName:             { lo: 'ຊື່ລູກຄ້າ',                   en: 'Guest Name' },
+  delete:                { lo: 'ລຶບ',                         en: 'Delete' },
+  priceByType:           { lo: 'ລາຄາຕໍ່ປະເພດຫ້ອງ',           en: 'Price by Room Type' },
+  savePrices:            { lo: 'ບັນທຶກລາຄາ',                  en: 'Save Prices' },
+  pricesSaved:           { lo: 'ບັນທຶກລາຄາສຳເລັດ',            en: 'Prices saved!' },
 };

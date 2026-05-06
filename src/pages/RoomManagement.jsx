@@ -1,24 +1,62 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { t } from '../i18n/translations';
 import { ROOM_TYPES, TYPE_ORDER, PRICES, createRoom } from '../data/rooms';
 import './RoomManagement.css';
 
-const EMPTY_FORM = { num: '', type: 'twin-s', price: String(PRICES['twin-s']) };
+const TYPE_SORT_ORDER = { 'twin-s': 0, 'twin-l': 1, 'single-s': 2, 'single-l': 3 };
 
-export default function RoomManagement({ rooms, onSave, onBack }) {
+export default function RoomManagement({ rooms, onSave, onBack, prices, onSavePrices }) {
   const { lang, toggleLang } = useLanguage();
+  // PRICES acts as fallback defaults — new types added to TYPE_ORDER always have a base price
+  const effectivePrices = { ...PRICES, ...(prices ?? {}) };
 
-  const [form, setForm]       = useState(EMPTY_FORM);
-  const [editNum, setEditNum] = useState(null); // null = ADD, room.num string = EDIT
+  /* ── Room form state ── */
+  const [form, setForm]     = useState({ num: '', type: 'twin-s' });
+  const [editNum, setEditNum] = useState(null);
   const [errors, setErrors]   = useState({});
+
+  /* ── Price panel state ── */
+  const [priceForm, setPriceForm] = useState(() =>
+    Object.fromEntries(TYPE_ORDER.map(k => [k, String(effectivePrices[k] ?? '')]))
+  );
+  const [priceErrors, setPriceErrors] = useState({});
+  const [priceSaved, setPriceSaved]   = useState(false);
+
+  /* ── Sort state ── */
+  const [sortCol, setSortCol] = useState('num');
+  const [sortDir, setSortDir] = useState('asc');
+
+  /* ── Delete modal ── */
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   const isEditMode = editNum !== null;
 
-  function handleTypeChange(type) {
-    setForm(prev => ({ ...prev, type, price: String(PRICES[type] ?? '') }));
+  /* ── Sorting ── */
+  function handleSort(col) {
+    if (col === sortCol) {
+      setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortCol(col);
+      setSortDir('asc');
+    }
   }
 
+  const sortedRooms = useMemo(() => {
+    return [...rooms].sort((a, b) => {
+      let cmp = 0;
+      if (sortCol === 'num') {
+        cmp = a.num.localeCompare(b.num, undefined, { numeric: true });
+      } else if (sortCol === 'type') {
+        cmp = (TYPE_SORT_ORDER[a.type] ?? 99) - (TYPE_SORT_ORDER[b.type] ?? 99);
+      } else if (sortCol === 'price') {
+        cmp = (effectivePrices[a.type] ?? 0) - (effectivePrices[b.type] ?? 0);
+      }
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+  }, [rooms, sortCol, sortDir, effectivePrices]);
+
+  /* ── Room form handlers ── */
   function handleChange(field, value) {
     setForm(prev => ({ ...prev, [field]: value }));
     if (errors[field]) setErrors(prev => ({ ...prev, [field]: false }));
@@ -42,35 +80,82 @@ export default function RoomManagement({ rooms, onSave, onBack }) {
     if (!isEditMode) {
       updated = [...rooms, createRoom(form.num.trim(), form.type)];
     } else {
-      updated = rooms.map(r =>
-        r.num === editNum ? { ...r, type: form.type } : r
-      );
+      updated = rooms.map(r => r.num === editNum ? { ...r, type: form.type } : r);
     }
     onSave(updated);
-    setForm(EMPTY_FORM);
+    setForm({ num: '', type: 'twin-s' });
     setEditNum(null);
     setErrors({});
   }
 
   function startEdit(room) {
     setEditNum(room.num);
-    setForm({ num: room.num, type: room.type, price: String(PRICES[room.type] ?? '') });
+    setForm({ num: room.num, type: room.type });
     setErrors({});
   }
 
   function cancelEdit() {
     setEditNum(null);
-    setForm(EMPTY_FORM);
+    setForm({ num: '', type: 'twin-s' });
     setErrors({});
   }
 
-  function handleDelete(room) {
-    if (!window.confirm(`${t.confirmDelete[lang]} ${t.roomNo[lang]} ${room.num}?`)) return;
-    onSave(rooms.filter(r => r.num !== room.num));
+  /* ── Price panel handlers ── */
+  function handlePriceChange(typeKey, value) {
+    setPriceForm(prev => ({ ...prev, [typeKey]: value }));
+    if (priceErrors[typeKey]) setPriceErrors(prev => ({ ...prev, [typeKey]: false }));
+    if (priceSaved) setPriceSaved(false);
+  }
+
+  function handleSavePrices() {
+    const errs = {};
+    const result = {};
+    for (const key of TYPE_ORDER) {
+      const v = Number(priceForm[key]);
+      if (!priceForm[key] || isNaN(v) || v <= 0) {
+        errs[key] = true;
+      } else {
+        result[key] = v;
+      }
+    }
+    setPriceErrors(errs);
+    if (Object.keys(errs).length) return;
+    onSavePrices?.(result);
+    setPriceSaved(true);
+    setTimeout(() => setPriceSaved(false), 2500);
+  }
+
+  /* ── Delete confirm ── */
+  function handleDeleteConfirm() {
+    if (!deleteTarget) return;
+    if (editNum === deleteTarget.num) cancelEdit();
+    onSave(rooms.filter(r => r.num !== deleteTarget.num));
+    setDeleteTarget(null);
   }
 
   return (
     <div className="rm-root">
+
+      {/* ── Delete confirm modal ── */}
+      {deleteTarget && (
+        <div className="rm-modal-overlay" onClick={() => setDeleteTarget(null)}>
+          <div className="rm-modal" onClick={e => e.stopPropagation()}>
+            <h3 className="rm-modal-title">{t.confirmDelete[lang]}</h3>
+            <p className="rm-modal-msg">
+              {t.roomNo[lang]} <strong>{deleteTarget.num}</strong>
+              {' — '}{t[ROOM_TYPES[deleteTarget.type]]?.[lang] ?? deleteTarget.type}
+            </p>
+            <div className="rm-modal-actions">
+              <button className="rm-btn rm-btn--danger" onClick={handleDeleteConfirm}>
+                {t.delete[lang]}
+              </button>
+              <button className="rm-btn rm-btn--outline" onClick={() => setDeleteTarget(null)}>
+                {t.cancel[lang]}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Top bar ── */}
       <header className="rm-topbar">
@@ -91,27 +176,27 @@ export default function RoomManagement({ rooms, onSave, onBack }) {
           <table className="rm-table">
             <thead>
               <tr>
-                <th>{t.roomNo[lang]}</th>
-                <th>{t.type[lang]}</th>
-                <th>{t.pricePerNight[lang]}</th>
-                <th>{t.status[lang]}</th>
+                <th className="rm-th--sortable" onClick={() => handleSort('num')}>
+                  {t.roomNo[lang]} <SortArrow col="num" sortCol={sortCol} sortDir={sortDir} />
+                </th>
+                <th className="rm-th--sortable" onClick={() => handleSort('type')}>
+                  {t.type[lang]} <SortArrow col="type" sortCol={sortCol} sortDir={sortDir} />
+                </th>
+                <th className="rm-th--sortable" onClick={() => handleSort('price')}>
+                  {t.pricePerNight[lang]} <SortArrow col="price" sortCol={sortCol} sortDir={sortDir} />
+                </th>
                 <th>{t.actions[lang]}</th>
               </tr>
             </thead>
             <tbody>
-              {rooms.map(room => (
+              {sortedRooms.map(room => (
                 <tr
                   key={room.num}
                   className={editNum === room.num ? 'rm-row--active' : ''}
                 >
                   <td className="rm-cell-num">{room.num}</td>
                   <td>{t[ROOM_TYPES[room.type]]?.[lang] ?? room.type}</td>
-                  <td>{(PRICES[room.type] ?? 0).toLocaleString()}</td>
-                  <td>
-                    <span className={`rm-badge rm-badge--${room.status}`}>
-                      {t[room.status]?.[lang] ?? room.status}
-                    </span>
-                  </td>
+                  <td>{(effectivePrices[room.type] ?? 0).toLocaleString()}</td>
                   <td className="rm-cell-actions">
                     <button
                       className="rm-icon-btn rm-icon-btn--edit"
@@ -122,7 +207,7 @@ export default function RoomManagement({ rooms, onSave, onBack }) {
                     </button>
                     <button
                       className="rm-icon-btn rm-icon-btn--del"
-                      onClick={() => handleDelete(room)}
+                      onClick={() => setDeleteTarget(room)}
                       title={t.confirmDelete[lang]}
                     >
                       <TrashIcon />
@@ -134,78 +219,106 @@ export default function RoomManagement({ rooms, onSave, onBack }) {
           </table>
         </div>
 
-        {/* ─── RIGHT: add / edit form ─── */}
-        <div className="rm-panel">
-          <h2 className="rm-panel-title">
-            {isEditMode ? t.editRoom[lang] : t.addNewRoom[lang]}
-          </h2>
-          <div className="rm-divider" />
+        {/* ─── RIGHT column: two panels stacked ─── */}
+        <div className="rm-right-col">
 
-          {/* Room number */}
-          <div className={`rm-field ${errors.num || errors.numDupe ? 'rm-field--error' : ''}`}>
-            <label className="rm-label">
-              {t.roomNo[lang]} <span className="rm-required">*</span>
-            </label>
-            <input
-              className="rm-input"
-              type="text"
-              value={form.num}
-              readOnly={isEditMode}
-              onChange={e => handleChange('num', e.target.value)}
-            />
-            {errors.num    && <span className="rm-error-msg">{t.required[lang]}</span>}
-            {errors.numDupe && <span className="rm-error-msg">{t.roomNumExists[lang]}</span>}
-          </div>
+          {/* Room add / edit panel */}
+          <div className={`rm-panel${isEditMode ? ' rm-panel--editing' : ''}`}>
+            <h2 className="rm-panel-title">
+              {isEditMode ? t.editRoom[lang] : t.addNewRoom[lang]}
+            </h2>
+            <div className="rm-divider" />
 
-          {/* Room type */}
-          <div className={`rm-field ${errors.type ? 'rm-field--error' : ''}`}>
-            <label className="rm-label">
-              {t.type[lang]} <span className="rm-required">*</span>
-            </label>
-            <select
-              className="rm-input rm-select"
-              value={form.type}
-              onChange={e => handleTypeChange(e.target.value)}
-            >
-              {TYPE_ORDER.map(typeKey => (
-                <option key={typeKey} value={typeKey}>
-                  {t[ROOM_TYPES[typeKey]]?.[lang] ?? typeKey}
-                </option>
-              ))}
-            </select>
-          </div>
+            {/* Room number */}
+            <div className={`rm-field ${errors.num || errors.numDupe ? 'rm-field--error' : ''}`}>
+              <label className="rm-label">
+                {t.roomNo[lang]} <span className="rm-required">*</span>
+              </label>
+              <input
+                className="rm-input"
+                type="text"
+                value={form.num}
+                readOnly={isEditMode}
+                onChange={e => handleChange('num', e.target.value)}
+              />
+              {errors.num     && <span className="rm-error-msg">{t.required[lang]}</span>}
+              {errors.numDupe && <span className="rm-error-msg">{t.roomNumExists[lang]}</span>}
+            </div>
 
-          {/* Price (auto-filled, informational) */}
-          <div className="rm-field">
-            <label className="rm-label">{t.pricePerNight[lang]}</label>
-            <input
-              className="rm-input rm-input--readonly"
-              type="number"
-              min="0"
-              readOnly
-              value={form.price}
-              onChange={e => handleChange('price', e.target.value)}
-            />
-          </div>
+            {/* Room type */}
+            <div className={`rm-field ${errors.type ? 'rm-field--error' : ''}`}>
+              <label className="rm-label">
+                {t.type[lang]} <span className="rm-required">*</span>
+              </label>
+              <select
+                className="rm-input rm-select"
+                value={form.type}
+                onChange={e => handleChange('type', e.target.value)}
+              >
+                {TYPE_ORDER.map(typeKey => (
+                  <option key={typeKey} value={typeKey}>
+                    {t[ROOM_TYPES[typeKey]]?.[lang] ?? typeKey}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-          <button className="rm-btn rm-btn--primary" onClick={handleSubmit}>
-            {isEditMode ? t.saveChanges[lang] : t.addRoom[lang]}
-          </button>
-
-          {isEditMode && (
-            <button className="rm-btn rm-btn--outline" onClick={cancelEdit}>
-              {t.cancel[lang]}
+            <button className="rm-btn rm-btn--primary" onClick={handleSubmit}>
+              {isEditMode ? t.saveChanges[lang] : t.addRoom[lang]}
             </button>
-          )}
-        </div>
 
+            {isEditMode && (
+              <button className="rm-btn rm-btn--outline" onClick={cancelEdit}>
+                {t.cancel[lang]}
+              </button>
+            )}
+          </div>
+
+          {/* Price by room type panel */}
+          <div className="rm-panel rm-price-panel">
+            <h2 className="rm-panel-title">{t.priceByType[lang]}</h2>
+            <div className="rm-divider" />
+
+            {TYPE_ORDER.map(typeKey => (
+              <div className="rm-price-row" key={typeKey}>
+                <span className="rm-price-label">
+                  {t[ROOM_TYPES[typeKey]]?.[lang] ?? typeKey}
+                </span>
+                <div className="rm-price-input-wrap">
+                  <input
+                    className={`rm-price-input${priceErrors[typeKey] ? ' rm-price-input--error' : ''}`}
+                    type="number"
+                    min="0"
+                    value={priceForm[typeKey]}
+                    onChange={e => handlePriceChange(typeKey, e.target.value)}
+                  />
+                  <span className="rm-price-unit">{t.priceUnit[lang]}</span>
+                </div>
+              </div>
+            ))}
+
+            {priceSaved && (
+              <div className="rm-price-saved">{t.pricesSaved[lang]}</div>
+            )}
+
+            <button className="rm-btn rm-btn--primary" onClick={handleSavePrices}>
+              {t.savePrices[lang]}
+            </button>
+          </div>
+
+        </div>
       </div>
     </div>
   );
 }
 
-/* ── Icons ── */
+/* ── Sort arrow indicator ── */
+function SortArrow({ col, sortCol, sortDir }) {
+  if (sortCol !== col) return <span className="rm-sort-arrow rm-sort-arrow--inactive">↕</span>;
+  return <span className="rm-sort-arrow">{sortDir === 'asc' ? '↑' : '↓'}</span>;
+}
 
+/* ── Icons ── */
 function PencilIcon() {
   return (
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
