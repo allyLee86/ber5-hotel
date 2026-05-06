@@ -2,6 +2,7 @@ export const t = {
   appName:          { lo: 'ເຮືອນພັກເບີ 5',              en: 'Ber 5 Guest House' },
   systemName:       { lo: 'ລະບົບຈັດການຫ້ອງພັກ',         en: 'Rooms Management System' },
   login:            { lo: 'ເຂົ້າສູ່ລະບົບ',               en: 'Login' },
+  loggingIn:        { lo: 'ກຳລັງເຂົ້າລະບົບ...',          en: 'Logging in...' },
   logout:           { lo: 'ອອກຈາກລະບົບ',               en: 'Logout' },
   username:         { lo: 'ຊື່ຜູ້ໃຊ້',                   en: 'Username' },
   password:         { lo: 'ລະຫັດຜ່ານ',                  en: 'Password' },

@@ -3,16 +3,15 @@ import { useLanguage } from '../context/LanguageContext';
 import { t } from '../i18n/translations';
 import './Login.css';
 
-const DEMO_USER = { username: 'admin', password: 'admin123', role: 'admin' };
-
 export default function Login({ onLogin }) {
   const { lang, toggleLang } = useLanguage();
 
-  const [username, setUsername]   = useState('');
-  const [password, setPassword]   = useState('');
-  const [showPass, setShowPass]   = useState(false);
-  const [errors, setErrors]       = useState({});
-  const [authError, setAuthError] = useState('');
+  const [username, setUsername]     = useState('');
+  const [password, setPassword]     = useState('');
+  const [showPass, setShowPass]     = useState(false);
+  const [errors, setErrors]         = useState({});
+  const [authError, setAuthError]   = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   function validate() {
     const e = {};
@@ -21,17 +20,20 @@ export default function Login({ onLogin }) {
     return e;
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     setAuthError('');
     const errs = validate();
     setErrors(errs);
     if (Object.keys(errs).length) return;
 
-    if (username === DEMO_USER.username && password === DEMO_USER.password) {
-      onLogin({ username, role: DEMO_USER.role });
-    } else {
+    setSubmitting(true);
+    try {
+      await onLogin(username, password);
+    } catch {
       setAuthError(t.invalidCredentials[lang]);
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -120,8 +122,8 @@ export default function Login({ onLogin }) {
           </div>
 
           {/* Submit */}
-          <button type="submit" className="login-submit-btn">
-            {t.login[lang]}
+          <button type="submit" className="login-submit-btn" disabled={submitting}>
+            {submitting ? t.loggingIn[lang] : t.login[lang]}
           </button>
         </form>
       </div>

@@ -80,7 +80,7 @@ export default function RoomPanel({ room, onSave, onCancel }) {
   function handleCheckOut() {
     setConfirmAction({
       message: `${t.checkOutNow[lang]} — ${t.roomNo[lang]} ${room.num}?`,
-      onConfirm: () => onSave({ ...room, status: 'vacant', guestData: null }),
+      onConfirm: () => onSave({ ...room, status: 'vacant', guestData: null, checkOutDate }),
     });
   }
 

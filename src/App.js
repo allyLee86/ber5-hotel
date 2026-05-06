@@ -8,91 +8,19 @@ import GuestInfo      from './pages/GuestInfo';
 import StayHistory    from './pages/StayHistory';
 import RoomManagement from './pages/RoomManagement';
 import UserManagement from './pages/UserManagement';
-import { initialRooms, PRICES } from './data/rooms';
+import { PRICES }     from './data/rooms';
+import * as api       from './api';
 
-function calculateNights(checkIn, checkOut) {
-  if (!checkIn || !checkOut) return 0;
-  const diff = (new Date(checkOut) - new Date(checkIn)) / 86400000;
-  return diff > 0 ? Math.round(diff) : 0;
-}
-
-function detectGuestType(gd) {
-  return (gd.phone || gd.idCard || gd.passportId) ? 'identified' : 'anonymous';
-}
-
-function matchesGuest(guest, gd) {
-  if (gd.phone      && guest.phone      && gd.phone      === guest.phone)      return true;
-  if (gd.idCard     && guest.idCard     && gd.idCard     === guest.idCard)     return true;
-  if (gd.passportId && guest.passportId && gd.passportId === guest.passportId) return true;
-  return false;
-}
-
-function upsertGuest(prev, gd, room) {
-  const guestType = detectGuestType(gd);
-  const stay = {
-    id:       Date.now(),
-    roomNum:  room.num,
-    roomType: room.type,
-    checkIn:  gd.checkIn  ?? null,
-    checkOut: gd.checkOut ?? null,
-    nights:   null,
-    total:    null,
-    status:   'current',
+/* Normalise API stays → StayHistory record format */
+function normaliseStay(s) {
+  return {
+    id:           s.id,
+    guestData:    { ...s.guestData, checkIn: s.checkIn, checkOut: s.checkOut },
+    room:         { num: s.roomNum, type: s.roomType },
+    checkOutDate: s.checkOut,
+    nights:       s.nights,
+    total:        s.total,
   };
-  const idx = prev.findIndex(g => matchesGuest(g, gd));
-  if (idx >= 0) {
-    const g = prev[idx];
-    const updated = { ...g, guestType, stays: [...g.stays, stay] };
-    ['nickName','firstName','middleName','lastName','age','gender','phone','idCard','passportId']
-      .forEach(k => { if (gd[k]) updated[k] = gd[k]; });
-    return prev.map((g2, i) => i === idx ? updated : g2);
-  }
-  return [...prev, {
-    id:         String(Date.now()),
-    nickName:   gd.nickName   ?? '',
-    firstName:  gd.firstName  ?? '',
-    middleName: gd.middleName ?? '',
-    lastName:   gd.lastName   ?? '',
-    age:        gd.age        ?? '',
-    gender:     gd.gender     ?? '',
-    phone:      gd.phone      ?? '',
-    idCard:     gd.idCard     ?? '',
-    passportId: gd.passportId ?? '',
-    guestType,
-    stays: [stay],
-  }];
-}
-
-function updateGuestInfo(prev, oldGd, newGd, roomNum) {
-  return prev.map(g => {
-    const byIds = matchesGuest(g, oldGd) || matchesGuest(g, newGd);
-    const byRoom = !byIds && g.stays.some(s => s.roomNum === roomNum && s.status === 'current');
-    if (!byIds && !byRoom) return g;
-    const updated = { ...g, guestType: detectGuestType(newGd) };
-    ['nickName','firstName','middleName','lastName','age','gender','phone','idCard','passportId']
-      .forEach(k => { if (newGd[k]) updated[k] = newGd[k]; });
-    updated.stays = g.stays.map(s =>
-      s.roomNum === roomNum && s.status === 'current'
-        ? { ...s, checkIn: newGd.checkIn ?? s.checkIn, checkOut: newGd.checkOut ?? s.checkOut }
-        : s
-    );
-    return updated;
-  });
-}
-
-function completeGuestStay(prev, roomNum, checkOutDate, nights, total) {
-  return prev.map(g => {
-    const hasCurrent = g.stays.some(s => s.roomNum === roomNum && s.status === 'current');
-    if (!hasCurrent) return g;
-    return {
-      ...g,
-      stays: g.stays.map(s =>
-        s.roomNum === roomNum && s.status === 'current'
-          ? { ...s, checkOut: checkOutDate, nights, total, status: 'completed' }
-          : s
-      ),
-    };
-  });
 }
 
 /* Map AdminMenu nav keys → internal screen names */
@@ -107,74 +35,172 @@ const SCREEN_MAP = {
 export default function App() {
   const [screen, setScreen]             = useState('login');
   const [user, setUser]                 = useState(null);
-  const [rooms, setRooms]               = useState(initialRooms);
+  const [rooms, setRooms]               = useState([]);
   const [prices, setPrices]             = useState(PRICES);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [lastCheckout, setLastCheckout] = useState(null);
   const [stayHistory, setStayHistory]   = useState([]);
   const [guests, setGuests]             = useState([]);
-  const [users, setUsers]               = useState([
-    { id: 1, name: 'Admin', username: 'admin', role: 'admin', active: true },
-  ]);
+  const [users, setUsers]               = useState([]);
+  const [loading, setLoading]           = useState(false);
 
-  /* ── Room panel: save a single room, detect checkout ── */
-  function handleSaveRoom(updatedRoom) {
-    setRooms(prev => prev.map(r => r.num === updatedRoom.num ? updatedRoom : r));
+  /* ── Load all data from API after login ── */
+  async function loadAllData() {
+    const [roomsData, pricesData, guestsData, staysData, usersData] = await Promise.all([
+      api.getRooms(),
+      api.getPrices(),
+      api.getGuests(),
+      api.getStays(),
+      api.getUsers().catch(() => []),  // 403 for staff role
+    ]);
+    setRooms(roomsData);
+    setPrices(pricesData);
+    setGuests(guestsData);
+    setStayHistory(staysData.map(normaliseStay));
+    setUsers(usersData);
+  }
 
-    const wasVacant   = selectedRoom?.status === 'vacant';
-    const wasBooked   = selectedRoom?.status === 'booked';
-    const wasOccupied = selectedRoom?.status === 'occupied';
-    const isNowVacant    = updatedRoom.status === 'vacant';
-    const isNowBooked    = updatedRoom.status === 'booked';
-    const isNowOccupied  = updatedRoom.status === 'occupied';
-    const isNowActive    = isNowOccupied || isNowBooked;
+  async function loadRooms() {
+    const data = await api.getRooms();
+    setRooms(data);
+  }
 
-    if (wasVacant && isNowActive && updatedRoom.guestData) {
-      setGuests(prev => upsertGuest(prev, updatedRoom.guestData, updatedRoom));
-    }
+  async function loadGuests() {
+    const data = await api.getGuests();
+    setGuests(data);
+  }
 
-    /* Info edit: same status, guest data changed */
-    if ((wasBooked && isNowBooked) || (wasOccupied && isNowOccupied)) {
-      if (updatedRoom.guestData) {
-        setGuests(prev => updateGuestInfo(prev, selectedRoom.guestData, updatedRoom.guestData, selectedRoom.num));
+  async function loadStayHistory() {
+    const data = await api.getStays();
+    setStayHistory(data.map(normaliseStay));
+  }
+
+  /* ── Login ── */
+  async function handleLogin(username, password) {
+    const { token, user: u } = await api.login(username, password);
+    api.setToken(token);
+    setUser(u);
+    await loadAllData();
+    setScreen('adminmenu');
+  }
+
+  /* ── Room panel: save changes for a single room ── */
+  async function handleSaveRoom(updatedRoom) {
+    if (loading) return;
+    const prev = selectedRoom;
+    const wasVacant   = prev.status === 'vacant';
+    const wasBooked   = prev.status === 'booked';
+    const wasOccupied = prev.status === 'occupied';
+    const isNowVacant   = updatedRoom.status === 'vacant';
+    const isNowBooked   = updatedRoom.status === 'booked';
+    const isNowOccupied = updatedRoom.status === 'occupied';
+
+    setLoading(true);
+    try {
+      if (wasVacant && isNowBooked) {
+        await api.bookRoom(updatedRoom.num, updatedRoom.guestData);
+
+      } else if (wasVacant && isNowOccupied) {
+        await api.checkInRoom(updatedRoom.num, updatedRoom.guestData);
+
+      } else if (wasBooked && isNowOccupied) {
+        await api.checkInRoom(updatedRoom.num, updatedRoom.guestData ?? {});
+
+      } else if (wasBooked && isNowVacant) {
+        await api.cancelBooking(updatedRoom.num);
+
+      } else if (wasOccupied && isNowVacant) {
+        const checkOutDate = updatedRoom.checkOutDate ?? new Date().toISOString().split('T')[0];
+        const result = await api.checkOutRoom(updatedRoom.num, checkOutDate);
+        await Promise.all([loadRooms(), loadGuests(), loadStayHistory()]);
+        setLastCheckout({
+          guest:        prev.guestData,
+          room:         prev,
+          checkOutDate: result.checkOutDate,
+          nights:       result.nights,
+          total:        result.total,
+        });
+        setScreen('receipt');
+        return;
+
+      } else if ((wasBooked && isNowBooked) || (wasOccupied && isNowOccupied)) {
+        await api.updateRoomGuest(updatedRoom.num, updatedRoom.guestData);
       }
-    }
 
-    if (wasOccupied && isNowVacant) {
-      const checkOutDate = new Date().toISOString().split('T')[0];
-      const nights = calculateNights(selectedRoom.guestData?.checkIn, checkOutDate);
-      const price  = { ...PRICES, ...prices }[selectedRoom.type] ?? 0;
-      setLastCheckout({
-        guest: selectedRoom.guestData,
-        room:  selectedRoom,
-        checkOutDate,
-        nights,
-        total: nights * price,
-        price,
-      });
-      setStayHistory(prev => [...prev, {
-        id:          Date.now(),
-        guestData:   { ...selectedRoom.guestData },
-        room:        { num: selectedRoom.num, type: selectedRoom.type },
-        checkOutDate,
-        nights,
-        total:       nights * price,
-      }]);
-      setGuests(prev => completeGuestStay(prev, selectedRoom.num, checkOutDate, nights, nights * price));
-      setScreen('receipt');
-    } else {
+      await Promise.all([loadRooms(), loadGuests()]);
       setScreen('dashboard');
+    } catch (err) {
+      alert(err.message || 'Server error');
+    } finally {
+      setLoading(false);
     }
   }
 
-  /* ── Room management: save full rooms array ── */
-  function handleSaveRooms(updatedRooms) {
-    setRooms(updatedRooms);
+  /* ── Room management: diff old vs new array and call appropriate API endpoints ── */
+  async function handleSaveRooms(updatedRooms) {
+    if (loading) return;
+    setLoading(true);
+    try {
+      const added       = updatedRooms.filter(r => !rooms.find(o => o.num === r.num));
+      const deleted     = rooms.filter(r => !updatedRooms.find(u => u.num === r.num));
+      const typeChanged = updatedRooms.filter(r => {
+        const old = rooms.find(o => o.num === r.num);
+        return old && old.type !== r.type;
+      });
+
+      for (const r of added)       await api.createRoom(r.num, r.type);
+      for (const r of deleted)     await api.deleteRoom(r.num);
+      for (const r of typeChanged) await api.updateRoom(r.num, r.type);
+
+      await loadRooms();
+    } catch (err) {
+      alert(err.message || 'Server error');
+      await loadRooms();
+    } finally {
+      setLoading(false);
+    }
   }
 
-  /* ── User management: save full users array ── */
-  function handleSaveUsers(updatedUsers) {
-    setUsers(updatedUsers);
+  /* ── Price management ── */
+  async function handleSavePrices(newPrices) {
+    try {
+      const saved = await api.updatePrices(newPrices);
+      setPrices(saved);
+    } catch (err) {
+      alert(err.message || 'Server error');
+    }
+  }
+
+  /* ── User management: diff old vs new array and call appropriate API endpoints ── */
+  async function handleSaveUsers(updatedUsers) {
+    if (loading) return;
+    setLoading(true);
+    try {
+      const added   = updatedUsers.filter(u => !users.find(o => o.id === u.id));
+      const deleted = users.filter(u => !updatedUsers.find(upd => upd.id === u.id));
+      const changed = updatedUsers.filter(u => {
+        const old = users.find(o => o.id === u.id);
+        if (!old) return false;
+        return (
+          old.name     !== u.name     ||
+          old.username !== u.username ||
+          old.role     !== u.role     ||
+          old.active   !== u.active   ||
+          !!u.password
+        );
+      });
+
+      for (const u of added)   await api.createUser(u);
+      for (const u of deleted) await api.deleteUser(u.id);
+      for (const u of changed) await api.updateUser(u.id, u);
+
+      const freshUsers = await api.getUsers().catch(() => []);
+      setUsers(freshUsers);
+    } catch (err) {
+      alert(err.message || 'Server error');
+    } finally {
+      setLoading(false);
+    }
   }
 
   function handleSelectRoom(room) {
@@ -190,7 +216,7 @@ export default function App() {
 
   if (screen === 'login') {
     return (
-      <Login onLogin={u => { setUser(u); setScreen('adminmenu'); }} />
+      <Login onLogin={handleLogin} />
     );
   }
 
@@ -199,7 +225,7 @@ export default function App() {
       <AdminMenu
         user={user}
         onNavigate={handleNavigate}
-        onLogout={() => { setUser(null); setScreen('login'); }}
+        onLogout={() => { api.setToken(null); setUser(null); setScreen('login'); }}
       />
     );
   }
@@ -258,7 +284,7 @@ export default function App() {
         onSave={handleSaveRooms}
         onBack={() => setScreen('adminmenu')}
         prices={prices}
-        onSavePrices={setPrices}
+        onSavePrices={handleSavePrices}
       />
     );
   }

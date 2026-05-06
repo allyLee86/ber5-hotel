@@ -16,7 +16,8 @@
 .sh-root {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
   background: #f4f5fb;
   font-family: 'Noto Sans Lao', 'Segoe UI', sans-serif;
   color: var(--text);
@@ -24,6 +25,9 @@
 
 /* ── Top bar ── */
 .sh-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
   display: flex;
   align-items: center;
   background: var(--primary);
@@ -207,7 +211,8 @@
 /* ── Table area ── */
 .sh-table-wrap {
   flex: 1;
-  overflow-x: auto;
+  min-height: 0;
+  overflow: auto;
   padding: 20px 24px;
 }
 
