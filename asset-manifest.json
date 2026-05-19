@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/ber5-hotel/static/css/main.10e005ac.css",
-    "main.js": "/ber5-hotel/static/js/main.24ff977e.js",
+    "main.css": "/ber5-hotel/static/css/main.3b55b9e0.css",
+    "main.js": "/ber5-hotel/static/js/main.ccb51283.js",
     "static/js/453.cad1e928.chunk.js": "/ber5-hotel/static/js/453.cad1e928.chunk.js",
     "index.html": "/ber5-hotel/index.html",
-    "main.10e005ac.css.map": "/ber5-hotel/static/css/main.10e005ac.css.map",
-    "main.24ff977e.js.map": "/ber5-hotel/static/js/main.24ff977e.js.map",
+    "main.3b55b9e0.css.map": "/ber5-hotel/static/css/main.3b55b9e0.css.map",
+    "main.ccb51283.js.map": "/ber5-hotel/static/js/main.ccb51283.js.map",
     "453.cad1e928.chunk.js.map": "/ber5-hotel/static/js/453.cad1e928.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.10e005ac.css",
-    "static/js/main.24ff977e.js"
+    "static/css/main.3b55b9e0.css",
+    "static/js/main.ccb51283.js"
   ]
 }
